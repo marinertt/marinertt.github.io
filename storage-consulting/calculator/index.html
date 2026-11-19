@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f5f3ec">
+<title>Storage cost lab | SPARKTACUS</title>
+<link rel="stylesheet" href="style.css?v=7">
+<script src="vendor/i18next.min.js?v=7" defer></script>
+<script src="i18n.js?v=7" defer></script>
+<script src="pricing.js?v=7" defer></script>
+<script src="lab.js?v=7" defer></script>
+</head>
+<body>
+<nav class="portfolio-links" aria-label="Portfolio navigation"><a href="/">SPARKTACUS!</a><a href="/storage-consulting/">Storage &amp; Cloud Optimization</a><a href="https://github.com/marinertt/marinertt.github.io/tree/main/storage-consulting/calculator">View source</a></nav>
+<header class="mast">
+<span data-t="site"></span><span data-t="region"></span>
+<label><span data-t="language"></span>
+<select id="language"><option value="en" lang="en">English</option><option value="ar" lang="ar">العربية</option><option value="de" lang="de">Deutsch</option></select>
+</label>
+</header>
+<main>
+<section class="intro"><h1 data-t="hero"></h1><p data-t="intro"></p></section>
+<p><a href="#comparison" data-t="jump"></a></p>
+<nav id="steps" data-label="nav"></nav>
+<div class="workspace">
+<section class="lesson" aria-labelledby="title">
+<p class="step" id="step"></p>
+<h2 id="title" tabindex="-1"></h2>
+<p id="description"></p>
+<div id="controls"></div>
+<details id="note"><summary id="note-title"></summary><p id="note-body"></p></details>
+<div class="actions"><button id="back" type="button">Back</button><button class="primary" id="next" type="button">Continue</button></div>
+</section>
+<section class="receipt" aria-labelledby="receipt-title">
+<h2 id="receipt-title" data-t="receipt"></h2>
+<div aria-live="polite">
+
+<dl class="cost-columns">
+<div><dt data-t="before"></dt><dd id="baseline" class="money" dir="ltr"></dd><dd><strong data-t="configuration"></strong><ul id="before-config"></ul></dd></div>
+<div><dt data-t="after"></dt><dd id="estimate" class="money" dir="ltr"></dd><dd><strong data-t="configuration"></strong><ul id="after-config"></ul></dd></div>
+</dl>
+<div class="savings"><span id="savings-label"></span><strong id="savings" class="money" dir="ltr"></strong><span id="savings-percent"></span></div>
+</div>
+<p id="cloud-context" class="fine"></p>
+<p class="fine" data-t="storageOnly"></p>
+<details class="source-summary" id="source-summary">
+<summary data-t="sourceEstimate"></summary>
+<p id="source-name"></p><strong id="source-total" class="money" dir="ltr"></strong>
+<dl class="source-breakdown"><dt data-t="sourceStorage"></dt><dd id="source-storage" class="money" dir="ltr"></dd><dt data-t="sourceUsage"></dt><dd id="source-usage" class="money" dir="ltr"></dd><dt data-t="source.extras"></dt><dd id="source-extras" class="money" dir="ltr"></dd></dl>
+<p class="fine" data-t="sourceScope"></p>
+<p class="combined"><span data-t="combinedTotal"></span> <strong id="combined-total" class="money" dir="ltr"></strong></p>
+</details>
+</section>
+</div>
+<section class="matrix" id="comparison" aria-labelledby="comparison-title">
+<h2 id="comparison-title" data-t="matrix"></h2>
+<p id="comparison-context"></p>
+<div class="table-scroll" tabindex="0" role="region" data-label="matrixLabel">
+<table>
+<thead><tr><th scope="col" data-t="format"></th><th scope="col" data-t="standard"></th><th scope="col" data-t="archive80"></th><th scope="col" data-t="policy"></th><th scope="col" data-t="custom"></th></tr></thead>
+<tbody id="comparison-rows"></tbody>
+</table>
+</div>
+<p class="fine" data-t="matrixFine"></p>
+<p class="fine" data-t="archiveFine"></p>
+</section>
+<details class="model"><summary data-t="model"></summary>
+<p data-t="modelBody"></p><p data-t="modelHold"></p>
+<p data-t="pricingSources"></p>
+<ul class="pricing-sources">
+<li><a href="https://aws.amazon.com/s3/pricing/">Amazon S3</a></li>
+<li><a href="https://cloud.google.com/storage/pricing">Google Cloud Storage</a></li>
+<li><a href="https://cloud.google.com/bigquery/pricing">BigQuery</a></li>
+<li><a href="https://aws.amazon.com/rds/postgresql/pricing/">RDS PostgreSQL</a></li>
+<li><a href="https://aws.amazon.com/dynamodb/pricing/">DynamoDB</a></li>
+<li><a href="https://www.mongodb.com/pricing">MongoDB Atlas</a></li>
+</ul>
+</details>
+</main>
+</body>
+</html>
