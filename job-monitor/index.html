@@ -1,0 +1,837 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Job Monitor | SPARKTACUS</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b1019; --panel: #111a27; --panel2: #162233; --line: #27364a;
+      --text: #e6edf7; --muted: #91a2b9; --mint: #79e0be; --blue: #9dc5ff;
+      --amber: #f3c878; --red: #ff8f91; --shadow: 0 16px 42px #02060c66;
+      font: 14px/1.45 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; color: var(--text); background: radial-gradient(ellipse at 68% -12%, #203957 0, transparent 38%), var(--bg); }
+    .portfolio-bar { border-bottom: 1px solid #344953; background: #101e28; }
+    .portfolio-bar-inner { width: min(1160px, calc(100% - 3rem)); min-height: 58px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; }
+    .portfolio-brand { color: #f2f5f1; font-size: 15px; font-weight: 850; letter-spacing: .12em; text-decoration: none; white-space: nowrap; }
+    .portfolio-brand span { color: #9ddfc2; }
+    .portfolio-bar nav { display: flex; flex-wrap: wrap; gap: .6rem 1.4rem; }
+    .portfolio-bar nav a { color: #b8c8cb; font-size: 12px; text-decoration: none; }
+    .portfolio-bar nav a:hover, .portfolio-bar nav a[aria-current="page"] { color: #f2f5f1; text-decoration: underline; text-decoration-color: #9ddfc2; text-underline-offset: 4px; }
+    .skip { position: absolute; inset-inline-start: 1rem; top: -5rem; z-index: 5; padding: .6rem; color: #0b1019; background: #e6edf7; }
+    .skip:focus { top: .5rem; }
+    button, input, select, textarea { font: inherit; color: inherit; }
+    button { border: 1px solid var(--line); background: #1b2a3d; border-radius: 9px; padding: 9px 12px; cursor: pointer; transition: .15s ease; }
+    button:hover { border-color: #537291; background: #22364d; transform: translateY(-1px); }
+    button.primary { color: #07140f; background: var(--mint); border-color: var(--mint); font-weight: 750; }
+    button.primary:hover { background: #a0f2d8; }
+    button.ghost { background: transparent; }
+    button.danger { color: var(--red); }
+    input, select, textarea { width: 100%; background: #0c1420; border: 1px solid var(--line); border-radius: 8px; padding: 9px 10px; outline: none; }
+    input:focus, select:focus, textarea:focus { border-color: #6ea6c7; box-shadow: 0 0 0 3px #79e0be17; }
+    textarea { min-height: 84px; resize: vertical; }
+    a { color: var(--blue); }
+    .shell { display: grid; grid-template-columns: minmax(270px, 320px) minmax(0, 1fr); min-height: 100vh; }
+    aside { padding: 22px 18px; border-right: 1px solid var(--line); background: #0e1621eF; overflow-y: auto; max-height: 100vh; position: sticky; top: 0; }
+    main { padding: 24px clamp(18px, 3vw, 42px) 42px; min-width: 0; }
+    .brand { display: flex; gap: 12px; align-items: center; margin-bottom: 24px; }
+    .mark { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 12px; color: #09140f; background: var(--mint); font-size: 19px; font-weight: 900; box-shadow: 0 0 28px #79e0be33; }
+    .brand b { display: block; font-size: 14px; letter-spacing: .01em; }
+    .brand small, .muted, .hint { color: var(--muted); }
+    .brand small { font-size: 11px; }
+    .eyebrow { color: var(--mint); font-size: 10px; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; }
+    h1 { font-size: clamp(24px, 3vw, 35px); margin: 4px 0 6px; letter-spacing: -.035em; }
+    h2 { font-size: 16px; margin: 0; }
+    h3 { font-size: 12px; margin: 0 0 10px; color: #c9d8e9; }
+    p { margin: 0; }
+    .subtitle { color: var(--muted); max-width: 800px; }
+    .topline { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+    .status { display: flex; align-items: center; gap: 8px; border: 1px solid var(--line); padding: 8px 11px; border-radius: 999px; background: #111a27; color: var(--muted); white-space: nowrap; font-size: 12px; }
+    .dot { width: 8px; height: 8px; border-radius: 100%; background: var(--mint); box-shadow: 0 0 10px #79e0be88; }
+    .section { border: 1px solid var(--line); border-radius: 14px; background: linear-gradient(140deg, #121d2b, #101824); box-shadow: var(--shadow); }
+    .config-head { display: flex; justify-content: space-between; align-items: center; margin: 0 0 12px; }
+    .config-section { border-top: 1px solid var(--line); padding: 14px 0; }
+    .field { display: grid; gap: 5px; margin: 9px 0; }
+    .field label { color: #b7c5d6; font-size: 11px; font-weight: 700; }
+    .field input, .field textarea { font-size: 12px; }
+    .field textarea.lines { min-height: 75px; }
+    .config-actions { display: grid; grid-template-columns: 1fr auto; gap: 8px; margin-top: 14px; }
+    .source-row { background: #111b29; border: 1px solid #253448; border-radius: 9px; padding: 9px; margin: 7px 0; }
+    .source-line { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .source-line strong { font-size: 11px; }
+    .source-row small { color: var(--muted); }
+    .source-row input[type="checkbox"] { width: auto; accent-color: var(--mint); }
+    .source-row input.tool-name { padding: 6px 8px; margin-top: 7px; }
+    .tag { display: inline-flex; gap: 5px; align-items: center; font-size: 10px; color: #b6c6d9; padding: 3px 7px; border-radius: 99px; border: 1px solid #34465b; background: #172436; }
+    .tag.green { color: var(--mint); border-color: #356a5c; }
+    .tag.amber { color: var(--amber); border-color: #705c38; }
+    .tag.red { color: var(--red); border-color: #74434c; }
+    .status-note { min-height: 18px; font-size: 11px; color: var(--muted); margin-top: 8px; }
+    .workbench { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 18px 0 14px; }
+    .window { overflow: hidden; min-width: 0; }
+    .window-head { padding: 12px 15px; background: #182638; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; }
+    .window-title { display: flex; align-items: center; gap: 9px; font-weight: 750; }
+    .window-icon { color: var(--blue); width: 22px; height: 22px; display: grid; place-items: center; border: 1px solid #405a74; border-radius: 7px; font-size: 11px; }
+    .window.server .window-icon { color: var(--mint); border-color: #356a5c; }
+    .window-body { padding: 14px; min-height: 225px; }
+    .request-block, .response-block { border: 1px solid #26374c; border-radius: 9px; padding: 11px; background: #0b131e; overflow: auto; max-height: 235px; }
+    .request-block pre, .response-block pre { margin: 6px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; color: #c4d2e2; font: 11px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .step { display: flex; gap: 9px; align-items: flex-start; padding: 7px 0; color: var(--muted); font-size: 11px; }
+    .step b { color: var(--text); }
+    .step-num { min-width: 18px; height: 18px; border-radius: 6px; display: grid; place-items: center; background: #1d3145; color: var(--mint); font-size: 10px; font-weight: 800; }
+    .actions { display: grid; grid-template-columns: 1.15fr 1fr 1fr auto; gap: 9px; align-items: end; padding: 14px; margin-bottom: 14px; }
+    .actions .field { margin: 0; }
+    .tools-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 11px 14px; margin-bottom: 14px; }
+    .inline { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .tabs { display: flex; gap: 6px; overflow-x: auto; padding: 4px 1px 10px; scrollbar-width: thin; }
+    .tab { color: var(--muted); white-space: nowrap; border-radius: 8px 8px 0 0; background: transparent; border-color: transparent; padding: 9px 12px; }
+    .tab.active { color: var(--text); border-color: var(--line); background: #172333; }
+    .results { min-height: 275px; overflow: hidden; }
+    .results-head { padding: 14px 16px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .results-body { padding: 12px; }
+    .job { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(200px, .75fr) auto; align-items: center; gap: 12px; padding: 13px; border-bottom: 1px solid #253347; }
+    .job:last-child { border-bottom: 0; }
+    .job-title { font-weight: 760; font-size: 13px; }
+    .job-company { color: var(--muted); font-size: 11px; margin-top: 3px; }
+    .job-notes { color: #bcc9d8; font-size: 11px; }
+    .job-actions { display: flex; gap: 6px; }
+    .job-actions button { padding: 6px 8px; font-size: 11px; }
+    .empty { color: var(--muted); padding: 30px 16px; text-align: center; }
+    .below { display: grid; grid-template-columns: minmax(0, 1fr) minmax(270px, .7fr); gap: 14px; margin-top: 14px; }
+    .subpanel { padding: 14px; }
+    .subpanel h2 { margin-bottom: 10px; }
+    .subpanel select, .subpanel textarea { margin: 6px 0; }
+    .subpanel textarea { min-height: 115px; }
+    .tools-list { display: flex; gap: 6px; flex-wrap: wrap; max-height: 115px; overflow: auto; margin: 8px 0; }
+    .tool-chip { cursor: pointer; font-family: ui-monospace, monospace; }
+    .tool-chip:hover { color: var(--mint); }
+    .notice { margin: 12px 0; padding: 10px 12px; border: 1px solid #705c38; border-radius: 9px; color: #ecd6ad; background: #31271666; font-size: 11px; }
+    .footer { margin-top: 18px; color: var(--muted); font-size: 10px; text-align: right; }
+    @media (max-width: 1050px) {
+      .shell { grid-template-columns: 275px minmax(0, 1fr); }
+      .actions { grid-template-columns: 1fr 1fr; }
+      .actions button { min-height: 38px; }
+    }
+    @media (max-width: 760px) {
+      .portfolio-bar-inner { width: calc(100% - 2rem); align-items: flex-start; flex-direction: column; padding: 12px 0; gap: 8px; }
+      .portfolio-bar nav { gap: .5rem 1rem; }
+      .shell { display: block; }
+      aside { position: static; max-height: none; border-right: 0; border-bottom: 1px solid var(--line); }
+      main { padding: 20px 14px 30px; }
+      .workbench, .below { grid-template-columns: 1fr; }
+      .topline { display: block; }
+      .status { display: inline-flex; margin-top: 12px; }
+      .job { grid-template-columns: 1fr; }
+    }
+  </style>
+<meta name="description" content="Explore a simulated job-monitor MCP workbench on the SPARKTACUS portfolio."><link rel="canonical" href="https://www.sparktacus.io/job-monitor/"></head>
+<body data-mode="static">
+  <a class="skip" href="#main">Skip to workbench</a>
+  <header class="portfolio-bar">
+    <div class="portfolio-bar-inner">
+      <a class="portfolio-brand" href="https://www.sparktacus.io/">SPARKTACUS<span>!</span></a>
+      <nav aria-label="Portfolio navigation">
+        <a href="https://www.sparktacus.io/">Home</a>
+        <a href="https://www.sparktacus.io/storage-consulting/">Storage &amp; Cloud Optimization</a>
+        <a href="https://www.sparktacus.io/job-monitor/" aria-current="page">Job Monitor</a>
+        <a href="https://www.sparktacus.io/#contact">Connect</a>
+      </nav>
+    </div>
+  </header>
+  <div class="shell">
+    <aside>
+      <div class="brand">
+        <div class="mark">JB</div>
+        <div><b>Job Board MCP</b><small>Interactive protocol workbench</small></div>
+      </div>
+      <div class="config-head">
+        <div><div class="eyebrow">01 · Configure</div><h2 style="margin-top:4px">Monitor profile</h2></div>
+        <span class="tag green">local</span>
+      </div>
+      <div class="field"><label for="profile-name">PROFILE NAME</label><input id="profile-name"></div>
+      <div class="field"><label for="timezone">TIMEZONE</label><input id="timezone"></div>
+      <div class="field"><label for="discovery-days">DISCOVERY WINDOW · DAYS</label><input id="discovery-days" type="number" min="1" max="60"></div>
+      <div class="field"><label for="title-queries">TITLE QUERIES · ONE PER LINE</label><textarea class="lines" id="title-queries"></textarea></div>
+      <div class="field"><label for="locations">SEARCH LOCATIONS · ONE PER LINE</label><textarea class="lines" id="locations"></textarea></div>
+      <details class="config-section">
+        <summary style="cursor:pointer;color:#c9d8e9;font-weight:700;font-size:12px">More profile settings</summary>
+        <div class="field"><label for="transition-queries">TRANSITION QUERIES</label><textarea class="lines" id="transition-queries"></textarea></div>
+        <div class="field"><label for="transition-locations">TRANSITION LOCATIONS</label><textarea class="lines" id="transition-locations"></textarea></div>
+        <div class="field"><label for="preferred-technologies">PREFERRED TECHNOLOGIES</label><textarea class="lines" id="preferred-technologies"></textarea></div>
+        <div class="field"><label for="excluded-companies">EXCLUDED COMPANIES</label><textarea class="lines" id="excluded-companies"></textarea></div>
+      </details>
+      <div class="config-section">
+        <div class="config-head"><h3 style="margin:0">Configured sources</h3><span id="source-count" class="tag">0</span></div>
+        <div id="sources-list"></div>
+      </div>
+      <div class="config-actions">
+        <button id="save-config" class="primary">Save &amp; reconnect</button>
+        <button id="reload" title="Reload active profile">↻</button>
+      </div>
+      <div id="config-status" class="status-note">Loading local configuration…</div>
+      <div id="sidebar-notice" class="notice"><b>Safe demo:</b> settings are copied to <code>.local/job-board-demo</code>. Demo fixtures are fake and unverified. Live searches require you to enable and configure a supported source.</div>
+    </aside>
+
+    <main id="main">
+      <div class="topline">
+        <div>
+          <div class="eyebrow">MCP · Client ↔ Server</div>
+          <h1>See the call. Follow the data.</h1>
+          <p class="subtitle">Explore the actual MCP tools, resources, and prompts. Every action shows the client request and the server response.</p>
+        </div>
+        <div class="status"><span class="dot"></span><span id="connection-status">Connecting to local server</span></div>
+      </div>
+      <div id="mode-notice" class="notice" hidden></div>
+
+      <section class="workbench">
+        <div class="section window client">
+          <div class="window-head"><div class="window-title"><span class="window-icon">C</span> MCP client</div><span class="tag">request</span></div>
+          <div class="window-body">
+            <div class="step"><span class="step-num">1</span><span id="client-step"><b>Choose an action.</b> This panel records the request sent over MCP stdio.</span></div>
+            <div class="request-block"><span class="eyebrow">LAST CLIENT REQUEST</span><pre id="client-request">Waiting for your first action…</pre></div>
+          </div>
+        </div>
+        <div class="section window server">
+          <div class="window-head"><div class="window-title"><span class="window-icon">S</span> MCP server</div><span class="tag green">response</span></div>
+          <div class="window-body">
+            <div class="step"><span class="step-num">2</span><span id="server-step"><b>Server ready.</b> Calls are routed to registered FastMCP handlers.</span></div>
+            <div class="response-block"><span class="eyebrow">LAST SERVER RESPONSE</span><pre id="server-response">Server response will appear here.</pre></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section actions">
+        <div class="field"><label for="source-select">SOURCE TOOL</label><select id="source-select"></select></div>
+        <div class="field"><label for="search-query">QUERY</label><input id="search-query" placeholder="e.g. data engineer"></div>
+        <div class="field"><label for="search-location">LOCATION</label><input id="search-location" placeholder="e.g. United States remote"></div>
+        <button id="search-button" class="primary">Run search →</button>
+      </section>
+      <div class="tools-row section">
+        <div><div class="eyebrow">Registered tools</div><div id="tools-list" class="tools-list"></div></div>
+        <button id="seed-demo" class="ghost">Load demo fixtures</button>
+      </div>
+
+      <div id="results-tabs" class="tabs" role="tablist"></div>
+      <section class="section results">
+        <div class="results-head"><div><div class="eyebrow">03 · Results</div><h2 id="results-title">Raw Search Hits</h2></div><div class="inline"><span id="result-count" class="tag">0 postings</span><button id="refresh-results" class="ghost">Refresh ↻</button></div></div>
+        <div id="results-body" class="results-body"><div class="empty">Loading audit results…</div></div>
+      </section>
+
+      <div class="below">
+        <section class="section subpanel">
+          <div class="eyebrow">04 · MCP resources</div><h2>Read a resource</h2>
+          <p class="hint">Resources are read explicitly; selecting one sends <code>resources/read</code>.</p>
+          <div class="inline" style="margin-top:8px"><select id="resource-select" style="flex:1"></select><button id="read-resource">Read</button></div>
+          <pre id="resource-output" class="response-block" style="margin-top:8px;white-space:pre-wrap;overflow:auto;max-height:160px;font-size:11px">No resource read yet.</pre>
+        </section>
+        <section class="section subpanel">
+          <div class="eyebrow">05 · MCP prompts</div><h2>Render a prompt</h2>
+          <p class="hint">Prompts are returned as instructions/context; rendering one does not run a search.</p>
+          <select id="prompt-select"></select>
+          <div id="prompt-arguments"></div>
+          <button id="get-prompt" style="margin-top:4px">Get prompt</button>
+          <pre id="prompt-output" class="response-block" style="margin-top:8px;white-space:pre-wrap;overflow:auto;max-height:160px;font-size:11px">No prompt rendered yet.</pre>
+        </section>
+      </div>
+      <div id="footer" class="footer">Loopback only · SQLite demo data stays in .local · No applications are submitted</div>
+    </main>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const STATIC_DEMO = document.body.dataset.mode === "static";
+    const STATIC_STORAGE_KEY = "job-board-mcp-pages-demo-v1";
+    const app = { profile: null, sources: [], tools: [], resources: [], templates: [], prompts: [], view: "raw", jobs: [] };
+    let staticDefaults;
+    const pretty = (value) => {
+      const text = JSON.stringify(value, null, 2);
+      return text.length > 12000 ? `${text.slice(0, 12000)}\n… response truncated for display` : text;
+    };
+    const asLines = (value) => Array.isArray(value) ? value.join("\n") : "";
+    const fromLines = (value) => value.split(/\r?\n/).map(x => x.trim()).filter(Boolean);
+
+    async function getStaticDefaults() {
+      if (!staticDefaults) {
+        const response = await fetch(new URL("./gui-demo.json", location.href), { cache: "no-store" });
+        if (!response.ok) throw new Error(`Could not load static demo defaults: HTTP ${response.status}`);
+        staticDefaults = await response.json();
+      }
+      return staticDefaults;
+    }
+
+    async function getStaticData() {
+      const defaults = await getStaticDefaults();
+      const saved = localStorage.getItem(STATIC_STORAGE_KEY);
+      const state = saved ? JSON.parse(saved) : {};
+      return {
+        profile: state.profile || JSON.parse(JSON.stringify(defaults.profile)),
+        sources: state.sources || JSON.parse(JSON.stringify(defaults.sources)),
+        jobs: state.jobs || []
+      };
+    }
+
+    function saveStaticData(state) {
+      localStorage.setItem(STATIC_STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function staticToolDefinitions(sources) {
+      const definitions = [
+        ["list_sources", "List configured demo source entries."],
+        ["search_jobs", "Simulated search. Pages does not make external requests."],
+        ["filter_jobs", "Filter the browser-local demo audit."],
+        ["import_hits", "Import a demo record; its availability remains Unclear."],
+        ["check_posting", "Simulated verification; the result remains Unclear."],
+        ["get_recheck_queue", "List demo records waiting for a real verification."],
+        ["promote_job", "Promotion is disabled in this static simulation."],
+        ["export_jobs", "Return the current demo view as text."]
+      ];
+      for (const source of sources) {
+        if (source.enabled !== false && ["greenhouse", "lever"].includes(source.adapter)) {
+          definitions.push([
+            source.tool_name || `search_${source.id}`,
+            `Simulated search for ${source.name || source.id}; no network request is made.`
+          ]);
+        }
+      }
+      return definitions.map(([name, description]) => ({
+        name,
+        description,
+        inputSchema: { type: "object", properties: { query: { type: "string" }, location: { type: "string" }, unique_key: { type: "string" } } }
+      }));
+    }
+
+    async function staticState() {
+      const state = await getStaticData();
+      return {
+        ...state,
+        tools: staticToolDefinitions(state.sources),
+        resources: [
+          { uri: "jobboards://catalog", name: "Source catalog", mimeType: "application/json" },
+          { uri: "jobs://audit", name: "Demo audit", mimeType: "application/json" },
+          { uri: "policy://profile", name: "Demo profile", mimeType: "application/json" }
+        ],
+        resource_templates: [{ uriTemplate: "jobboard://{source_id}", name: "Source details", mimeType: "application/json" }],
+        prompts: [
+          { name: "discovery_queries", description: "Render sample discovery queries; does not search.", arguments: [{ name: "as_of", description: "Optional date" }] },
+          { name: "run_job_check", description: "Render the workflow; does not run it.", arguments: [{ name: "as_of", description: "Optional date" }] },
+          { name: "assess_job", description: "Render a sample assessment; does not promote.", arguments: [{ name: "unique_key", description: "Demo posting key", required: true }] },
+          { name: "report_changes", description: "Render reporting guidance; does not invent activity.", arguments: [{ name: "since", description: "Optional date" }] }
+        ]
+      };
+    }
+
+    function staticResult(value, isError = false) {
+      return { structuredContent: value, content: [{ type: "text", text: JSON.stringify(value) }], isError };
+    }
+
+    async function staticRequest(url, options = {}) {
+      const parsed = new URL(url, location.href);
+      const method = options.method || "GET";
+      if (parsed.pathname.endsWith("/api/state")) return staticState();
+      if (parsed.pathname.endsWith("/api/results")) {
+        const state = await getStaticData();
+        const view = parsed.searchParams.get("view") || "raw";
+        const jobs = view === "raw" ? state.jobs : state.jobs.filter(job => job.region === view && job.current_status === "Open");
+        return staticResult(jobs);
+      }
+      if (parsed.pathname.endsWith("/api/config") && method === "POST") {
+        const body = JSON.parse(options.body || "{}");
+        if (!body.profile || !Array.isArray(body.profile.regions) || !Array.isArray(body.sources)) {
+          throw new Error("Profile regions and a source list are required.");
+        }
+        const current = await getStaticData();
+        saveStaticData({ ...current, profile: body.profile, sources: body.sources });
+        return staticState();
+      }
+      if (parsed.pathname.endsWith("/api/demo-seed") && method === "POST") {
+        const defaults = await getStaticDefaults();
+        const state = await getStaticData();
+        const existing = new Set(state.jobs.map(job => job.unique_key));
+        const added = defaults.fixtures
+          .filter(job => !existing.has(job.url))
+          .map(job => ({
+            ...job,
+            unique_key: job.url,
+            job_link: job.url,
+            current_status: "Unclear",
+            availability: "Unclear",
+            overall_fit: "possible",
+            notes: `${job.description} Static demo: not checked.`
+          }));
+        state.jobs.push(...added);
+        saveStaticData(state);
+        return staticResult({ added: added.length, total: state.jobs.length, simulated: true });
+      }
+      if (parsed.pathname.endsWith("/api/resource")) {
+        const uri = parsed.searchParams.get("uri") || "";
+        const state = await getStaticData();
+        let contents;
+        if (uri === "jobs://audit") contents = state.jobs;
+        else if (uri === "policy://profile") contents = state.profile;
+        else if (uri === "jobboards://catalog") contents = state.sources;
+        else if (uri.startsWith("jobboard://")) {
+          contents = state.sources.find(source => source.id === uri.slice("jobboard://".length));
+          if (!contents) throw new Error(`Unknown demo source: ${uri}`);
+        } else throw new Error(`Unknown demo resource: ${uri}`);
+        return { contents: [{ uri, mimeType: "application/json", text: JSON.stringify(contents, null, 2) }] };
+      }
+      if (parsed.pathname.endsWith("/api/prompt") && method === "POST") {
+        const body = JSON.parse(options.body || "{}");
+        return staticPrompt(body.name, body.arguments || {});
+      }
+      if (parsed.pathname.endsWith("/api/tool") && method === "POST") {
+        const body = JSON.parse(options.body || "{}");
+        return staticToolCall(body.name, body.arguments || {});
+      }
+      throw new Error(`Static demo route not supported: ${method} ${parsed.pathname}`);
+    }
+
+    async function staticToolCall(name, args) {
+      const state = await getStaticData();
+      const toolNames = staticToolDefinitions(state.sources).map(tool => tool.name);
+      if (!toolNames.includes(name)) throw new Error(`Tool is not configured in the demo: ${name}`);
+      if (name === "list_sources") return staticResult(state.sources);
+      if (name === "filter_jobs") {
+        const jobs = state.jobs.filter(job => (!args.region || args.region === "raw" || job.region === args.region)
+          && (!args.query || `${job.title} ${job.company}`.toLowerCase().includes(args.query.toLowerCase())));
+        return staticResult(jobs.slice(0, args.limit || 100));
+      }
+      if (name === "get_recheck_queue") return staticResult(state.jobs.filter(job => job.current_status !== "Open"));
+      if (name === "check_posting") {
+        return staticResult({ unique_key: args.unique_key, current_status: "Unclear", note: "Simulated only: GitHub Pages cannot check a live posting." });
+      }
+      if (name === "promote_job") {
+        return staticResult({ promoted: false, note: "Promotion is disabled in the static demo; no live verification is available." }, true);
+      }
+      if (name === "export_jobs") return staticResult("Static demo export is not connected to a workbook.");
+      if (name === "import_hits") {
+        return staticResult({ imported: 0, note: "Use Load demo fixtures to add the included synthetic .invalid URLs." });
+      }
+      return staticResult({
+        fetched: 0,
+        jobs: [],
+        simulated: true,
+        note: "No search was performed. This GitHub Pages demo has no network-backed MCP server."
+      });
+    }
+
+    async function staticPrompt(name, args) {
+      const prompts = {
+        discovery_queries: `SIMULATED PROMPT · Discovery queries for ${args.as_of || "today"}. No search is performed.`,
+        run_job_check: `SIMULATED PROMPT · The active demo profile is ${JSON.stringify((await getStaticData()).profile)}. No monitor run is performed.`,
+        assess_job: `SIMULATED PROMPT · Assess demo posting ${args.unique_key || "(none)"}. No posting is promoted.`,
+        report_changes: `SIMULATED PROMPT · Report changes since ${args.since || "the previous run"}. No activity is inferred.`
+      };
+      if (!prompts[name]) throw new Error(`Unknown demo prompt: ${name}`);
+      return { description: "Static demonstration only; these messages do not start an agent.", messages: [{ role: "user", content: { type: "text", text: prompts[name] } }] };
+    }
+
+    async function request(url, options = {}) {
+      if (STATIC_DEMO) return staticRequest(url, options);
+      const response = await fetch(url, { cache: "no-store", ...options });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || `HTTP ${response.status}`);
+      return payload;
+    }
+
+    function setTrace(clientRequest, serverResponse, serverDescription, clientDescription) {
+      $("client-request").textContent = pretty(clientRequest);
+      $("client-step").textContent = clientDescription || "Request sent to the MCP server.";
+      $("server-response").textContent = pretty(serverResponse);
+      $("server-step").textContent = `${STATIC_DEMO ? "SIMULATED · " : ""}${serverDescription || "MCP server returned this response."}`;
+    }
+
+    function unwrapResult(result) {
+      if (result?.structuredContent !== undefined && result.structuredContent !== null) return result.structuredContent;
+      const blocks = (result?.content || []).filter(block => block.type === "text").map(block => block.text);
+      if (blocks.length === 1) {
+        try { return JSON.parse(blocks[0]); } catch { return blocks[0]; }
+      }
+      return blocks;
+    }
+
+    function registerState(state) {
+      app.profile = state.profile;
+      app.sources = state.sources;
+      app.tools = state.tools;
+      app.resources = state.resources;
+      app.templates = state.resource_templates;
+      app.prompts = state.prompts;
+      $("connection-status").textContent = STATIC_DEMO
+        ? `${state.tools.length} tools · simulated`
+        : `${state.tools.length} tools · MCP connected`;
+      if (STATIC_DEMO) {
+        $("mode-notice").hidden = false;
+        $("mode-notice").textContent = "GitHub Pages static demo: MCP calls are simulated in this browser. Searches, verification, promotion, and workbook writes do not reach a server. Settings and sample rows stay in this browser’s local storage.";
+        $("sidebar-notice").innerHTML = "<b>Static demo:</b> settings and synthetic fixtures stay in this browser. No searches or posting checks run.";
+        $("save-config").textContent = "Save in this browser";
+        $("footer").textContent = "Static simulation · browser local storage · no live searches, checks, promotions, or applications";
+        document.querySelector(".subtitle").textContent = "Explore a simulated MCP client/server flow. The hosted demo makes no live searches or posting checks.";
+        document.querySelector(".window.client .window-title").lastChild.textContent = " Client request (simulated)";
+        document.querySelector(".window.server .window-title").lastChild.textContent = " MCP server simulation";
+        $("client-step").textContent = "Choose an action. This panel shows the simulated protocol request.";
+        $("server-step").textContent = "Static simulation ready. No MCP server process is connected.";
+        document.querySelector(".window.server .tag").textContent = "simulated";
+        document.querySelector(".window.server .tag").className = "tag amber";
+        $("search-button").textContent = "Simulate search →";
+      }
+      renderProfile();
+      renderSources();
+      renderToolChips();
+      renderTabs();
+      renderResources();
+      renderPrompts();
+    }
+
+    function renderProfile() {
+      const p = app.profile;
+      $("profile-name").value = p.name || "";
+      $("timezone").value = p.timezone || "";
+      $("discovery-days").value = p.discovery_days ?? 3;
+      $("title-queries").value = asLines(p.title_queries);
+      $("locations").value = asLines(p.locations);
+      $("transition-queries").value = asLines(p.transition_queries);
+      $("transition-locations").value = asLines(p.transition_locations);
+      $("preferred-technologies").value = asLines(p.preferred_technologies);
+      $("excluded-companies").value = asLines(p.excluded_companies);
+    }
+
+    function renderSources() {
+      $("source-count").textContent = `${app.sources.length} sources`;
+      $("sources-list").replaceChildren();
+      $("source-select").replaceChildren();
+      const live = app.sources.filter(source => source.enabled !== false && ["greenhouse", "lever"].includes(source.adapter));
+      for (const source of live) {
+        const option = document.createElement("option");
+        option.value = source.id;
+        option.textContent = `${source.name || source.id} · ${source.tool_name || `search_${source.id}`}`;
+        $("source-select").append(option);
+      }
+      if (!live.length) {
+        const option = document.createElement("option");
+        option.textContent = "No enabled live source — use demo fixtures";
+        option.value = "";
+        $("source-select").append(option);
+        $("search-button").disabled = true;
+      } else {
+        $("search-button").disabled = false;
+      }
+      app.sources.forEach((source, index) => {
+        const row = document.createElement("div");
+        row.className = "source-row";
+        const head = document.createElement("div");
+        head.className = "source-line";
+        const title = document.createElement("strong");
+        title.textContent = source.name || source.id;
+        const state = document.createElement("label");
+        state.className = "source-line";
+        state.title = STATIC_DEMO ? "Enable simulated source" : "Enable supported live source";
+        const toggle = document.createElement("input");
+        toggle.type = "checkbox";
+        toggle.checked = source.enabled !== false;
+        toggle.disabled = !["greenhouse", "lever"].includes(source.adapter);
+        toggle.addEventListener("change", () => { app.sources[index].enabled = toggle.checked; });
+        state.append(toggle);
+        head.append(title, state);
+        const meta = document.createElement("small");
+        meta.textContent = `${source.adapter || "manual"} · ${source.id}`;
+        row.append(head, meta);
+        if (["greenhouse", "lever"].includes(source.adapter)) {
+          const toolName = document.createElement("input");
+          toolName.className = "tool-name";
+          toolName.setAttribute("aria-label", `MCP tool name for ${source.id}`);
+          toolName.placeholder = `search_${source.id}`;
+          toolName.value = source.tool_name || "";
+          toolName.addEventListener("input", () => { app.sources[index].tool_name = toolName.value.trim(); });
+          row.append(toolName);
+          const board = document.createElement("input");
+          board.className = "tool-name";
+          board.setAttribute("aria-label", `Employer board token for ${source.id}`);
+          board.placeholder = "Greenhouse board token / Lever site name";
+          board.value = source.board_token || source.board || source.site || "";
+          board.addEventListener("input", () => { app.sources[index].board = board.value.trim(); });
+          row.append(board);
+          const company = document.createElement("input");
+          company.className = "tool-name";
+          company.setAttribute("aria-label", `Company name for ${source.id}`);
+          company.placeholder = "Company display name";
+          company.value = source.company || "";
+          company.addEventListener("input", () => { app.sources[index].company = company.value.trim(); });
+          row.append(company);
+        }
+        $("sources-list").append(row);
+      });
+    }
+
+    function renderToolChips() {
+      const list = $("tools-list");
+      list.replaceChildren();
+      for (const tool of app.tools) {
+        const chip = document.createElement("span");
+        chip.className = "tag tool-chip";
+        chip.textContent = tool.name;
+        chip.title = tool.description || "MCP tool";
+        chip.addEventListener("click", () => {
+          $("client-request").textContent = pretty({ method: "tools/call", name: tool.name, inputSchema: tool.inputSchema });
+          $("client-step").textContent = `Selected ${tool.name}. Use the search controls or result-row actions to provide arguments.`;
+        });
+        list.append(chip);
+      }
+    }
+
+    function renderTabs() {
+      const workbook = app.profile.workbook || {};
+      const tabs = [workbook.raw_tab || "Raw Search Hits", ...(workbook.regional_tabs || []), workbook.career_transition_tab || "Career Transition Jobs"];
+      const container = $("results-tabs");
+      container.replaceChildren();
+      tabs.forEach((name, index) => {
+        const view = index === 0 ? "raw" : name;
+        const button = document.createElement("button");
+        button.className = `tab ${app.view === view ? "active" : ""}`;
+        button.setAttribute("role", "tab");
+        button.setAttribute("aria-selected", String(app.view === view));
+        button.textContent = name;
+        button.addEventListener("click", () => { app.view = view; loadResults(); });
+        container.append(button);
+      });
+    }
+
+    function renderResources() {
+      const select = $("resource-select");
+      select.replaceChildren();
+      for (const item of app.resources) {
+        const option = document.createElement("option");
+        option.value = item.uri;
+        option.textContent = item.name ? `${item.name} · ${item.uri}` : item.uri;
+        select.append(option);
+      }
+      const sourceTemplate = app.templates.find(item => item.uriTemplate === "jobboard://{source_id}");
+      if (sourceTemplate) {
+        for (const source of app.sources) {
+          const option = document.createElement("option");
+          option.value = `jobboard://${source.id}`;
+          option.textContent = `Source details · ${source.name || source.id}`;
+          select.append(option);
+        }
+      }
+    }
+
+    function renderPrompts() {
+      const select = $("prompt-select");
+      select.replaceChildren();
+      for (const prompt of app.prompts) {
+        const option = document.createElement("option");
+        option.value = prompt.name;
+        option.textContent = prompt.name;
+        option.title = prompt.description || "";
+        select.append(option);
+      }
+      select.onchange = renderPromptArguments;
+      renderPromptArguments();
+    }
+
+    function renderPromptArguments() {
+      const prompt = app.prompts.find(item => item.name === $("prompt-select").value);
+      const container = $("prompt-arguments");
+      container.replaceChildren();
+      for (const arg of prompt?.arguments || []) {
+        const label = document.createElement("label");
+        label.className = "field";
+        label.textContent = arg.name;
+        const input = document.createElement("input");
+        input.dataset.promptArg = arg.name;
+        input.placeholder = arg.description || "";
+        label.append(input);
+        container.append(label);
+      }
+    }
+
+    function displayJobs(result) {
+      const data = unwrapResult(result);
+      app.jobs = Array.isArray(data) ? data : data?.result || [];
+      $("result-count").textContent = `${app.jobs.length} postings`;
+      $("results-title").textContent = app.view === "raw" ? "Raw Search Hits" : app.view;
+      const container = $("results-body");
+      container.replaceChildren();
+      if (!app.jobs.length) {
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        empty.textContent = app.view === "raw"
+          ? "No audit rows yet. Load clearly labeled demo fixtures or enable a configured live source."
+          : "No rows in this view yet. Closed or unclear postings are not promoted; verified open jobs can be added after a successful check.";
+        container.append(empty);
+        return;
+      }
+      for (const job of app.jobs) {
+        const row = document.createElement("article");
+        row.className = "job";
+        const main = document.createElement("div");
+        const title = document.createElement("div");
+        title.className = "job-title";
+        title.textContent = job.title || job.job_title || "Untitled posting";
+        const company = document.createElement("div");
+        company.className = "job-company";
+        company.textContent = `${job.company || "Unknown company"} · ${job.location || "Unknown location"}`;
+        main.append(title, company);
+        const details = document.createElement("div");
+        details.className = "job-notes";
+        const status = document.createElement("span");
+        const availability = job.availability || job.current_status || "Unclear";
+        status.className = `tag ${availability === "Open" ? "green" : availability === "Closed" ? "red" : "amber"}`;
+        status.textContent = availability;
+        const fit = document.createElement("span");
+        fit.className = "tag";
+        fit.textContent = job.overall_fit || "possible";
+        details.append(status, document.createTextNode(" "), fit);
+        const note = document.createElement("div");
+        note.style.marginTop = "5px";
+        note.textContent = job.notes || job.search_stream || job.source_id || "";
+        details.append(note);
+        const actions = document.createElement("div");
+        actions.className = "job-actions";
+        const verify = document.createElement("button");
+        verify.textContent = "Verify";
+        verify.title = STATIC_DEMO ? "Simulate check_posting; live availability is not checked" : "Call check_posting on this exact URL";
+        verify.addEventListener("click", () => callTool("check_posting", { unique_key: job.unique_key }));
+        const link = document.createElement("a");
+        link.href = job.url || job.job_link || "#";
+        link.textContent = "Open ↗";
+        link.target = "_blank";
+        link.rel = "noreferrer";
+        link.className = "tag";
+        if (!(job.url || job.job_link)) link.hidden = true;
+        const promote = document.createElement("button");
+        promote.textContent = "Promote";
+        promote.title = STATIC_DEMO
+          ? "Promotion is disabled in this static simulation"
+          : "Ask the server to apply its verified-open and eligibility gates";
+        promote.disabled = availability !== "Open" || !job.unique_key;
+        promote.addEventListener("click", async () => {
+          const region = app.view === "raw" ? app.profile.regions.find(item => item !== "Career Transition Jobs") : app.view;
+          if (!region) return;
+          await callTool("promote_job", { unique_key: job.unique_key, region, overall_fit: "possible", notes: "" });
+        });
+        actions.append(verify, promote, link);
+        row.append(main, details, actions);
+        container.append(row);
+      }
+    }
+
+    async function loadResults(showTrace = true) {
+      $("results-body").innerHTML = '<div class="empty">Requesting results via filter_jobs…</div>';
+      const clientRequest = { method: "tools/call", name: "filter_jobs", arguments: { region: app.view === "raw" ? "" : app.view, limit: 1000 } };
+      const description = STATIC_DEMO
+        ? "Static filter simulation reads browser-local sample rows."
+        : "Server handler: filter_jobs → SQLite audit query.";
+      if (showTrace) setTrace(clientRequest, "Waiting for MCP response…", description, "Client calls filter_jobs for the selected results tab.");
+      try {
+        const result = await request(`/api/results?view=${encodeURIComponent(app.view)}`);
+        if (showTrace) setTrace(clientRequest, result, STATIC_DEMO ? "Static filter simulation returned these rows." : "MCP server response received from filter_jobs.", "Client received the selected view.");
+        displayJobs(result);
+      } catch (error) { showError(error); }
+    }
+
+    async function callTool(name, arguments_) {
+      const clientRequest = { method: "tools/call", name, arguments: arguments_ };
+      setTrace(clientRequest, "Waiting for MCP response…", "Server is processing the registered tool call.", `Client calls ${name}.`);
+      try {
+        const response = await request("/api/tool", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name, arguments: arguments_ }) });
+        const data = unwrapResult(response);
+        setTrace(clientRequest, response, `Server returned ${response.isError ? "an error" : "a response"} for ${name}.`, `Client received the result from ${name}.`);
+        if (name.startsWith("search_") || name === "search_jobs" || name === "import_hits" || name === "check_posting") {
+          await loadResults(false);
+        }
+        return data;
+      } catch (error) { showError(error); }
+    }
+
+    function showError(error) {
+      $("connection-status").textContent = "Action failed";
+      $("server-response").textContent = String(error);
+      $("server-step").textContent = STATIC_DEMO
+        ? "The static simulation returned an error; no successful action is implied."
+        : "The local GUI or MCP server returned an error; no successful action is implied.";
+    }
+
+    async function loadState() {
+      try {
+        registerState(await request("/api/state"));
+        $("config-status").textContent = STATIC_DEMO
+          ? `Browser-local configuration · ${$("connection-status").textContent}`
+          : `Private local config · ${$("connection-status").textContent}`;
+        await loadResults();
+      } catch (error) { showError(error); $("config-status").textContent = String(error); }
+    }
+
+    $("save-config").addEventListener("click", async () => {
+      const profile = structuredClone(app.profile);
+      profile.name = $("profile-name").value.trim();
+      profile.timezone = $("timezone").value.trim();
+      profile.discovery_days = Number($("discovery-days").value);
+      profile.title_queries = fromLines($("title-queries").value);
+      profile.locations = fromLines($("locations").value);
+      profile.transition_queries = fromLines($("transition-queries").value);
+      profile.transition_locations = fromLines($("transition-locations").value);
+      profile.preferred_technologies = fromLines($("preferred-technologies").value);
+      profile.excluded_companies = fromLines($("excluded-companies").value);
+      $("config-status").textContent = STATIC_DEMO
+        ? "Saving configuration in this browser…"
+        : "Saving local files and reconnecting MCP server…";
+      try {
+        registerState(await request("/api/config", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ profile, sources: app.sources }) }));
+        $("config-status").textContent = STATIC_DEMO
+          ? "Saved in this browser · simulation ready"
+          : `Saved locally · server reconnected · ${app.tools.length} tools`;
+        await loadResults();
+      } catch (error) { showError(error); $("config-status").textContent = String(error); }
+    });
+    $("reload").addEventListener("click", loadState);
+    $("refresh-results").addEventListener("click", loadResults);
+    $("search-button").addEventListener("click", async () => {
+      const source = app.sources.find(item => item.id === $("source-select").value);
+      if (!source) return;
+      const toolName = source.tool_name || `search_${source.id.replace(/[^A-Za-z0-9_-]+/g, "_").replace(/^_+|_+$/g, "")}`;
+      await callTool(toolName, { query: $("search-query").value, location: $("search-location").value, search_stream: "GUI search" });
+    });
+    $("seed-demo").addEventListener("click", async () => {
+      $("connection-status").textContent = "Loading demo fixtures";
+      const result = await request("/api/demo-seed", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }).catch(showError);
+      if (result) {
+        const call = { method: "tools/call", name: "import_hits", arguments: { hits: "3 demo-only example URLs", search_stream: "GUI demo fixtures" } };
+        const description = STATIC_DEMO
+          ? "Static simulation saved synthetic .invalid URLs with Unclear availability; no MCP server was called."
+          : "Server ran import_hits and saved fixtures with Unclear availability. They are not real jobs.";
+        setTrace(call, result, description, "Client imported safe .invalid demo fixture URLs.");
+        app.view = "raw"; renderTabs(); await loadResults(false);
+      }
+    });
+    $("read-resource").addEventListener("click", async () => {
+      const uri = $("resource-select").value;
+      const clientRequest = { method: "resources/read", uri };
+      setTrace(clientRequest, "Waiting for resource contents…", "Server is resolving the selected resource.", "Client explicitly reads the selected resource.");
+      try {
+        const result = await request(`/api/resource?uri=${encodeURIComponent(uri)}`);
+        setTrace(clientRequest, result, "Server returned resource contents.", "Client received resource contents.");
+        $("resource-output").textContent = pretty(result);
+      } catch (error) { showError(error); }
+    });
+    $("get-prompt").addEventListener("click", async () => {
+      const name = $("prompt-select").value;
+      const arguments_ = {};
+      document.querySelectorAll("[data-prompt-arg]").forEach(input => { arguments_[input.dataset.promptArg] = input.value; });
+      const clientRequest = { method: "prompts/get", name, arguments: arguments_ };
+      setTrace(clientRequest, "Waiting for prompt messages…", "Server is rendering the selected prompt.", "Client requests a prompt template; no search is started.");
+      try {
+        const result = await request("/api/prompt", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name, arguments: arguments_ }) });
+        setTrace(clientRequest, result, "Server returned rendered prompt messages.", "Client received prompt instructions/context.");
+        $("prompt-output").textContent = pretty(result);
+      } catch (error) { showError(error); }
+    });
+
+    loadState();
+  </script>
+</body>
+</html>

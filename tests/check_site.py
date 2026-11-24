@@ -38,4 +38,14 @@ for path, page in pages.items():
             assert url.fragment in pages[target].ids, f'Broken fragment: {link}'
 assert (ROOT / 'CNAME').read_text().strip() == 'www.sparktacus.io'
 assert (ROOT / '.nojekyll').exists()
+job_monitor = ROOT / 'job-monitor' / 'index.html'
+assert job_monitor.is_file(), 'Missing generated Job Monitor page'
+assert 'data-mode="static"' in job_monitor.read_text(), 'Job Monitor must use static simulation mode'
+for path, page in pages.items():
+    if path.name == 'index.html' and path in {
+        ROOT / 'index.html',
+        ROOT / 'storage-consulting' / 'index.html',
+        ROOT / 'storage-consulting' / 'calculator' / 'index.html',
+    }:
+        assert '/job-monitor/' in page.links, f'{path.relative_to(ROOT)}: missing Job Monitor navigation'
 print(f'Passed: local links, assets, fragments, IDs and domain across {len(pages)} pages.')

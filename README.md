@@ -6,10 +6,11 @@ Consulting portfolio: https://www.sparktacus.io/
 
 - `/`: consulting homepage and showcase navigation.
 - `/storage-consulting/`: Storage & Cloud Cost Optimization service showcase.
+- `/job-monitor/`: static MCP workbench simulation with synthetic job postings.
 - `/storage-consulting/calculator/`: interactive storage and database cost lab,
   including English, German, and Arabic translations.
 
-Static HTML, CSS, and JavaScript. No build step, account, analytics, or backend is
+Static HTML, CSS, and JavaScript. No runtime backend, account, or analytics is
 required. GitHub Pages publishes the root of `main`. `CNAME` preserves the custom
 domain; `.nojekyll` serves these files directly.
 
@@ -39,6 +40,12 @@ to be copied here, preserving the portfolio links. Calculations are in `lab.js`
 and `pricing.js`; translation JSON files live in `locales/`. i18next 25.6.3 and its
 MIT license are bundled in `vendor/`. Language selection follows browser
 preferences, with English fallback.
+
+The Job Monitor page is generated from the private `job-board-mcp` project. To
+refresh it, run `python scripts/build_pages.py --output /path/to/marinertt.github.io/job-monitor`
+from that repository, then run this site's checks and publish this repository.
+The hosted workbench is a simulation: Pages cannot run the Python MCP server, so
+it does not search for or verify live jobs or write to a workbook.
 
 ## Estimate scope
 

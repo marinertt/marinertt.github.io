@@ -1,0 +1,113 @@
+{
+  "profile": {
+    "name": "Sample profile",
+    "timezone": "UTC",
+    "discovery_days": 3,
+    "recent_recheck_days": 14,
+    "regions": [
+      "Example Region",
+      "Fully Remote",
+      "Career Transition Jobs"
+    ],
+    "career_transition_region": "Career Transition Jobs",
+    "career_transition_regions": [
+      "Example Region",
+      "Fully Remote"
+    ],
+    "region_location_patterns": {
+      "Example Region": {
+        "include_any": [
+          "example region",
+          "sample city"
+        ],
+        "require_all": [],
+        "exclude_any": []
+      },
+      "Fully Remote": {
+        "include_any": [
+          "united states",
+          "usa",
+          "u.s."
+        ],
+        "require_all": [
+          "remote"
+        ],
+        "exclude_any": [
+          "hybrid",
+          "office attendance",
+          "onsite required"
+        ]
+      }
+    },
+    "title_queries": [
+      "data engineer"
+    ],
+    "locations": [
+      "Example Region",
+      "United States remote"
+    ],
+    "transition_queries": [
+      "technical apprenticeship"
+    ],
+    "transition_locations": [
+      "Example Region"
+    ],
+    "preferred_technologies": [
+      "Python",
+      "SQL"
+    ],
+    "excluded_companies": [],
+    "workbook": {
+      "raw_tab": "Raw Search Hits",
+      "regional_tabs": [
+        "Example Region",
+        "Fully Remote"
+      ],
+      "career_transition_tab": "Career Transition Jobs"
+    }
+  },
+  "sources": [
+    {
+      "id": "sample_board",
+      "name": "Sample job board",
+      "adapter": "greenhouse",
+      "tool_name": "search_sample_board",
+      "board": "sample",
+      "company": "Demo Company",
+      "enabled": true,
+      "notes": "Simulated source only. No external request is made."
+    }
+  ],
+  "fixtures": [
+    {
+      "company": "Sample Utility",
+      "title": "Electrical Apprentice",
+      "location": "Sample City, ZZ",
+      "url": "https://example.invalid/jobs/sample-apprentice",
+      "source_id": "demo_fixtures",
+      "posting_date": "Unknown",
+      "work_arrangement": "On-site",
+      "description": "Synthetic demo posting."
+    },
+    {
+      "company": "Demo Analytics",
+      "title": "Data Platform Engineer",
+      "location": "Remote - United States",
+      "url": "https://example.invalid/jobs/sample-data-platform",
+      "source_id": "demo_fixtures",
+      "posting_date": "Unknown",
+      "work_arrangement": "Remote",
+      "description": "Synthetic demo posting."
+    },
+    {
+      "company": "Demo Operations",
+      "title": "Controls Technician",
+      "location": "Example Region",
+      "url": "https://example.invalid/jobs/sample-controls",
+      "source_id": "demo_fixtures",
+      "posting_date": "Unknown",
+      "work_arrangement": "On-site",
+      "description": "Synthetic demo posting."
+    }
+  ]
+}
