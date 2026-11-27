@@ -58,8 +58,11 @@
     details > summary::-webkit-details-marker { display: none; }
     details > summary::before { content: "›"; color: var(--mint); font-size: 17px; line-height: 1; transition: transform .15s ease; }
     details[open] > summary::before { transform: rotate(90deg); }
-    .profile-select-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: end; }
-    .profile-select-row .field { margin: 0; }
+    .sidebar-group { border: 1px solid var(--line); border-radius: 11px; margin: 10px 0; padding: 11px; background: #0e1621; }
+    .sidebar-group > summary { justify-content: space-between; font-weight: 750; }
+    .sidebar-group[open] > summary { margin-bottom: 9px; }
+    .sidebar-hint { color: var(--muted); font-size: 11px; line-height: 1.45; margin: 6px 0 10px; }
+    .config-subsection { border-top: 1px solid var(--line); margin-top: 11px; padding-top: 11px; }
     .source-row { background: #111b29; border: 1px solid #253448; border-radius: 9px; padding: 9px; margin: 7px 0; }
     .source-summary { justify-content: space-between; font-size: 11px; }
     .source-summary::before { margin-right: 2px; }
@@ -85,7 +88,7 @@
     .tag.amber { color: var(--amber); border-color: #705c38; }
     .tag.red { color: var(--red); border-color: #74434c; }
     .status-note { min-height: 18px; font-size: 11px; color: var(--muted); margin-top: 8px; }
-    .view-switcher { display: flex; gap: 5px; width: max-content; max-width: 100%; padding: 4px; margin: 0 0 16px; border: 1px solid var(--line); border-radius: 11px; background: #0e1621; }
+    .view-switcher { display: flex; flex-wrap: wrap; gap: 5px; width: max-content; max-width: 100%; padding: 4px; margin: 0 0 16px; border: 1px solid var(--line); border-radius: 11px; background: #0e1621; }
     .view-tab { color: var(--muted); border-color: transparent; background: transparent; }
     .view-tab[aria-selected="true"] { color: var(--text); border-color: #3c566d; background: #24384e; }
     .view-panel[hidden] { display: none; }
@@ -103,9 +106,10 @@
     .step-num { min-width: 18px; height: 18px; border-radius: 6px; display: grid; place-items: center; background: #1d3145; color: var(--mint); font-size: 10px; font-weight: 800; }
     .actions { display: grid; grid-template-columns: 1.15fr 1fr 1fr auto; gap: 9px; align-items: end; padding: 14px; margin-bottom: 14px; }
     .actions .field { margin: 0; }
-    .results-search { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: end; padding: 12px 14px; margin-bottom: 10px; }
-    .results-search .field { margin: 0; }
+    .results-search, .resource-reader { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: end; padding: 12px 14px; margin-bottom: 10px; }
+    .results-search .field, .resource-reader .field { margin: 0; }
     .results-search small, .source-search-help { color: var(--muted); font-size: 11px; }
+    .resource-reader small { color: var(--muted); font-size: 11px; }
     .source-search { margin-bottom: 14px; padding: 11px 14px; }
     .source-search[open] summary { margin-bottom: 8px; }
     .source-search > summary { font-weight: 750; color: #c9d8e9; }
@@ -118,6 +122,12 @@
     .results { min-height: 275px; overflow: hidden; }
     .results-head { padding: 14px 16px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; gap: 12px; }
     .results-body { padding: 12px; }
+    .profile-context { display: grid; gap: 4px; padding: 10px 14px; margin: 0 0 10px; background: #111b29; }
+    .profile-context[hidden] { display: none; }
+    .profile-context strong { font-size: 12px; }
+    .profile-context span:last-child { color: var(--muted); font-size: 11px; overflow-wrap: anywhere; }
+    .resource-output-panel { overflow: hidden; }
+    .resource-output { min-height: 160px; margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; color: #c4d2e2; font: 11px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
     .job { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(200px, .75fr) auto; align-items: center; gap: 12px; padding: 15px; margin-bottom: 9px; border: 1px solid #253347; border-radius: 12px; background: #111b29; }
     .job:last-child { margin-bottom: 0; }
     .job-title { font-weight: 760; font-size: 13px; }
@@ -178,63 +188,65 @@
         <div><b>Job Board MCP</b><small>Local-first job monitor</small></div>
       </div>
       <div class="config-head">
-        <div><div class="eyebrow">01 · Configure</div><h2 style="margin-top:4px">Monitor profile</h2></div>
+        <div><div class="eyebrow">01 · Configure</div><h2 style="margin-top:4px">Monitor settings</h2></div>
         <span class="tag green">local</span>
       </div>
-      <div class="profile-select-row">
-        <label class="field" for="profile-select"><span class="eyebrow">SAVED PROFILES</span><select id="profile-select"></select></label>
-      </div>
-      <details id="profile-editor" class="config-section" open>
-        <summary><strong>Profile settings</strong><span id="active-profile-tag" class="tag">Active</span></summary>
-        <div class="field"><label for="profile-name">PROFILE NAME</label><input id="profile-name"></div>
-        <div class="field"><label for="timezone">TIMEZONE</label><input id="timezone"></div>
-        <div class="field"><label for="discovery-days">DISCOVERY WINDOW · DAYS</label><input id="discovery-days" type="number" min="1" max="60"></div>
-        <div class="field"><label for="title-queries">TITLE QUERIES · ONE PER LINE</label><textarea class="lines" id="title-queries"></textarea></div>
-        <div class="field"><label for="locations">SEARCH LOCATIONS · ONE PER LINE</label><textarea class="lines" id="locations"></textarea></div>
-        <details class="config-section">
-          <summary>More profile settings</summary>
-          <div class="field"><label for="transition-queries">TRANSITION QUERIES</label><textarea class="lines" id="transition-queries"></textarea></div>
-          <div class="field"><label for="transition-locations">TRANSITION LOCATIONS</label><textarea class="lines" id="transition-locations"></textarea></div>
-          <div class="field"><label for="preferred-technologies">PREFERRED TECHNOLOGIES</label><textarea class="lines" id="preferred-technologies"></textarea></div>
-          <div class="field"><label for="excluded-companies">EXCLUDED COMPANIES</label><textarea class="lines" id="excluded-companies"></textarea></div>
+      <details id="profiles-panel" class="sidebar-group">
+        <summary><strong>Profiles</strong><span id="profile-count" class="tag">0 profiles</span></summary>
+        <p class="sidebar-hint">Each profile has a results tab. Select a profile tab to edit its settings.</p>
+        <details id="profile-editor" class="config-section">
+          <summary><strong>Profile settings</strong><span id="active-profile-tag" class="tag">Active</span></summary>
+          <div class="field"><label for="profile-name">PROFILE NAME</label><input id="profile-name"></div>
+          <div class="field"><label for="timezone">TIMEZONE</label><input id="timezone"></div>
+          <div class="field"><label for="discovery-days">DISCOVERY WINDOW · DAYS</label><input id="discovery-days" type="number" min="1" max="60"></div>
+          <div class="field"><label for="title-queries">TITLE QUERIES · ONE PER LINE</label><textarea class="lines" id="title-queries"></textarea></div>
+          <div class="field"><label for="locations">SEARCH LOCATIONS · ONE PER LINE</label><textarea class="lines" id="locations"></textarea></div>
+          <details class="config-section">
+            <summary>More profile settings</summary>
+            <div class="field"><label for="transition-queries">TRANSITION QUERIES</label><textarea class="lines" id="transition-queries"></textarea></div>
+            <div class="field"><label for="transition-locations">TRANSITION LOCATIONS</label><textarea class="lines" id="transition-locations"></textarea></div>
+            <div class="field"><label for="preferred-technologies">PREFERRED TECHNOLOGIES</label><textarea class="lines" id="preferred-technologies"></textarea></div>
+            <div class="field"><label for="excluded-companies">EXCLUDED COMPANIES</label><textarea class="lines" id="excluded-companies"></textarea></div>
+          </details>
+        </details>
+        <details id="new-profile-panel" class="config-section">
+          <summary>Add a profile tab</summary>
+          <div class="field"><label for="new-profile-name">NEW PROFILE NAME</label><input id="new-profile-name" placeholder="e.g. Data engineering"></div>
+          <p class="hint">Starts as a copy of the active profile. The new tab filters captured results by its title and location criteria.</p>
+          <button id="create-profile" class="primary" type="button">Add profile</button>
         </details>
       </details>
-      <details id="new-profile-panel" class="config-section">
-        <summary>Create a profile and results tab</summary>
-        <div class="field"><label for="new-profile-name">NEW PROFILE NAME</label><input id="new-profile-name" placeholder="e.g. Data engineering"></div>
-        <p class="hint">Starts as a copy of the active profile. Its tab filters captured results by its title and location criteria.</p>
-        <button id="create-profile" class="primary" type="button">Create profile</button>
-      </details>
-      <div class="config-section">
-        <div class="config-head"><h3 style="margin:0">Job boards</h3><span id="source-count" class="tag">0 sources</span></div>
-        <div id="sources-list"></div>
-        <details id="add-source-panel" class="source-row">
-          <summary class="source-summary"><strong>Add a job board</strong><span class="tag">configure</span></summary>
-          <div class="source-add-form">
-            <label class="field"><span>ADAPTER</span><select id="new-source-adapter"><option value="greenhouse">Greenhouse</option><option value="lever">Lever</option><option value="manual">Manual / URL import</option></select></label>
-            <div class="field"><label for="new-source-name">DISPLAY NAME</label><input id="new-source-name" placeholder="Company job board"></div>
-            <div class="field"><label for="new-source-id">SOURCE ID</label><input id="new-source-id" placeholder="company_jobs"></div>
-            <div id="new-source-api-fields">
-              <div class="field"><label id="new-source-board-label" for="new-source-board">BOARD TOKEN</label><input id="new-source-board" placeholder="Employer board token"></div>
-              <div class="field"><label for="new-source-company">COMPANY NAME</label><input id="new-source-company" placeholder="Company display name"></div>
+      <details id="resources-panel" class="sidebar-group">
+        <summary><strong>Resources</strong><span id="resource-count" class="tag">0 resources</span></summary>
+        <div class="config-subsection">
+          <div class="config-head"><h3 style="margin:0">Job boards</h3><span id="source-count" class="tag">0 sources</span></div>
+          <div id="sources-list"></div>
+          <details id="add-source-panel" class="source-row">
+            <summary class="source-summary"><strong>Add a job board</strong><span class="tag">configure</span></summary>
+            <div class="source-add-form">
+              <label class="field"><span>ADAPTER</span><select id="new-source-adapter"><option value="greenhouse">Greenhouse</option><option value="lever">Lever</option><option value="manual">Manual / URL import</option></select></label>
+              <div class="field"><label for="new-source-name">DISPLAY NAME</label><input id="new-source-name" placeholder="Company job board"></div>
+              <div class="field"><label for="new-source-id">SOURCE ID</label><input id="new-source-id" placeholder="company_jobs"></div>
+              <div id="new-source-api-fields">
+                <div class="field"><label id="new-source-board-label" for="new-source-board">BOARD TOKEN</label><input id="new-source-board" placeholder="Employer board token"></div>
+                <div class="field"><label for="new-source-company">COMPANY NAME</label><input id="new-source-company" placeholder="Company display name"></div>
+              </div>
+              <div id="new-source-manual-fields" hidden>
+                <div class="field"><label for="new-source-url">SOURCE URL</label><input id="new-source-url" type="url" placeholder="https://example.com/careers"></div>
+                <div class="field"><label for="new-source-notes">NOTES</label><textarea id="new-source-notes" placeholder="How to find specific postings"></textarea></div>
+              </div>
+              <label class="source-enabled"><input id="new-source-enabled" type="checkbox" checked> Enable source</label>
+              <button id="create-source" class="primary" type="button">Add source</button>
             </div>
-            <div id="new-source-manual-fields" hidden>
-              <div class="field"><label for="new-source-url">SOURCE URL</label><input id="new-source-url" type="url" placeholder="https://example.com/careers"></div>
-              <div class="field"><label for="new-source-notes">NOTES</label><textarea id="new-source-notes" placeholder="How to find specific postings"></textarea></div>
-            </div>
-            <label class="source-enabled"><input id="new-source-enabled" type="checkbox" checked> Enable source</label>
-            <button id="create-source" class="primary" type="button">Add source</button>
-          </div>
-        </details>
-      </div>
-      <details id="resources-panel" class="config-section">
-        <summary><strong>MCP resources</strong><span id="resource-count" class="tag">0</span></summary>
-        <p class="hint">Read a resource to inspect its data. This does not change your profile or sources.</p>
-        <div class="inline" style="margin-top:8px"><select id="resource-select" style="flex:1" aria-label="MCP resource"></select><button id="read-resource" type="button">Read</button></div>
-        <pre id="resource-output" class="response-block" style="margin-top:8px;white-space:pre-wrap;overflow:auto;max-height:200px;font-size:11px">No resource read yet.</pre>
+          </details>
+        </div>
+        <div class="config-subsection">
+          <div class="config-head"><h3 style="margin:0">MCP resources</h3></div>
+          <p class="sidebar-hint">Choose and read an MCP resource in the Search a resource tab.</p>
+        </div>
       </details>
       <div class="config-actions">
-        <button id="save-config" class="primary">Save &amp; reconnect</button>
+        <button id="save-config" class="primary">Save in this browser</button>
         <button id="reload" title="Reload active profile">↻</button>
       </div>
       <div id="config-status" class="status-note">Loading local configuration…</div>
@@ -243,7 +255,8 @@
 
     <main id="main">
       <div class="view-switcher" role="tablist" aria-label="Main views">
-        <button id="results-view-tab" class="view-tab" role="tab" data-workspace-tab aria-selected="true" aria-controls="results-view">Results</button>
+        <button id="results-view-tab" class="view-tab" role="tab" data-workspace-tab aria-selected="true" aria-controls="results-view">Search results</button>
+        <button id="resource-view-tab" class="view-tab" role="tab" data-workspace-tab aria-selected="false" aria-controls="resource-view" tabindex="-1">Search a resource</button>
         <button id="how-it-works-tab" class="view-tab" role="tab" data-workspace-tab aria-selected="false" aria-controls="how-it-works-view" tabindex="-1">How it works</button>
       </div>
       <div id="mode-notice" class="notice" hidden></div>
@@ -253,7 +266,7 @@
           <div>
             <div class="eyebrow">Job monitor</div>
             <h1>Search results</h1>
-            <p id="monitor-subtitle" class="subtitle">Browse captured postings by view. Configure searches and sources in the profile panel.</p>
+            <p id="monitor-subtitle" class="subtitle">Browse captured postings by view. Configure profiles and job boards in the left panel.</p>
           </div>
           <div class="status"><span class="dot"></span><span id="connection-status">Connecting to local server</span></div>
         </div>
@@ -271,15 +284,41 @@
             <button id="search-button" class="primary">Run source search →</button>
           </section>
         </details>
-        </section>
         <div class="tools-row section">
           <div><div class="eyebrow">Sample board</div><span class="muted">Load fictional sample listings to explore result views. The hosted demo preloads them.</span></div>
           <button id="seed-demo" class="ghost">Load demo fixtures</button>
         </div>
         <div id="results-tabs" class="tabs" role="tablist" aria-label="Result views"></div>
+        <div id="active-profile-context" class="section profile-context" hidden>
+          <div class="eyebrow">Profile tab</div>
+          <strong id="active-profile-name"></strong>
+          <span id="active-profile-criteria"></span>
+        </div>
         <section id="results-section" class="section results">
           <div class="results-head"><div><div class="eyebrow">Results</div><h2 id="results-title">Raw Search Hits</h2></div><div class="inline"><span id="result-count" class="tag">0 postings</span><button id="refresh-results" class="ghost">Refresh ↻</button></div></div>
           <div id="results-body" class="results-body"><div class="empty">Loading audit results…</div></div>
+        </section>
+      </section>
+
+      <section id="resource-view" class="view-panel" role="tabpanel" aria-labelledby="resource-view-tab" hidden>
+        <div class="topline">
+          <div>
+            <div class="eyebrow">MCP resources</div>
+            <h1>Search a resource</h1>
+            <p class="subtitle">Choose a resource to read its contents. Resources are read-only and do not run a job-board search.</p>
+          </div>
+        </div>
+        <section class="section resource-reader" aria-label="Read a resource">
+          <div class="field">
+            <label for="resource-select">RESOURCE</label>
+            <select id="resource-select" aria-label="MCP resource"></select>
+            <small>Select a resource exposed by the connected job monitor.</small>
+          </div>
+          <button id="read-resource" class="primary" type="button">Read resource</button>
+        </section>
+        <section class="section resource-output-panel">
+          <div class="results-head"><div><div class="eyebrow">Resource contents</div><h2>Read-only data</h2></div></div>
+          <div class="results-body"><pre id="resource-output" class="resource-output">Select a resource and choose Read resource to inspect its contents.</pre></div>
         </section>
       </section>
 
@@ -666,9 +705,10 @@
         document.querySelector(".window.server .tag").textContent = "simulated";
         document.querySelector(".window.server .tag").className = "tag amber";
         $("search-button").textContent = "Simulate source search →";
+      } else {
+        $("save-config").textContent = "Save & reconnect";
       }
       renderProfile();
-      renderProfileSelector();
       renderSources();
       renderToolChips();
       renderTabs();
@@ -688,18 +728,7 @@
       $("preferred-technologies").value = asLines(p.preferred_technologies);
       $("excluded-companies").value = asLines(p.excluded_companies);
       $("active-profile-tag").textContent = p.name || "Active";
-    }
-
-    function renderProfileSelector() {
-      const select = $("profile-select");
-      select.replaceChildren();
-      for (const item of app.profiles) {
-        const option = document.createElement("option");
-        option.value = item.id;
-        option.textContent = item.profile.name || "Untitled profile";
-        option.selected = item.id === app.activeProfileId;
-        select.append(option);
-      }
+      $("profile-count").textContent = `${app.profiles.length} ${app.profiles.length === 1 ? "profile" : "profiles"}`;
     }
 
     function renderSources() {
@@ -835,7 +864,7 @@
         { view: "raw", label: workbook.raw_tab || "Raw Search Hits" },
         ...app.profiles.map(item => ({
           view: `profile:${item.id}`,
-          label: `Profile · ${item.profile.name || "Untitled profile"}`,
+          label: item.profile.name || "Untitled profile",
           profileId: item.id
         })),
         ...(workbook.regional_tabs || []).map(name => ({ view: name, label: name })),
@@ -850,8 +879,11 @@
         button.setAttribute("aria-selected", String(app.view === tab.view));
         button.textContent = tab.label;
         if (tab.profileId) {
-          button.title = "Show captured results matching this profile’s title and location criteria";
-          button.addEventListener("click", () => activateProfile(tab.profileId, true));
+          const profile = app.profiles.find(item => item.id === tab.profileId)?.profile;
+          const titles = [...(profile?.title_queries || []), ...(profile?.transition_queries || [])];
+          const locations = [...(profile?.locations || []), ...(profile?.transition_locations || [])];
+          button.title = `Titles: ${titles.join(", ") || "Any"} · Locations: ${locations.join(", ") || "Any"}`;
+          button.addEventListener("click", () => activateProfile(tab.profileId));
         } else {
           button.addEventListener("click", () => {
             app.view = tab.view;
@@ -882,6 +914,13 @@
           select.append(option);
         }
       }
+      if (!select.options.length) {
+        const option = document.createElement("option");
+        option.value = "";
+        option.textContent = "No resources available";
+        select.append(option);
+      }
+      $("read-resource").disabled = !select.value;
     }
 
     function renderPrompts() {
@@ -923,6 +962,13 @@
     function renderJobs() {
       const profileId = app.view.startsWith("profile:") ? app.view.slice("profile:".length) : "";
       const selectedProfile = app.profiles.find(item => item.id === profileId);
+      $("active-profile-context").hidden = !selectedProfile;
+      if (selectedProfile) {
+        const titles = [...(selectedProfile.profile.title_queries || []), ...(selectedProfile.profile.transition_queries || [])];
+        const locations = [...(selectedProfile.profile.locations || []), ...(selectedProfile.profile.transition_locations || [])];
+        $("active-profile-name").textContent = selectedProfile.profile.name || "Untitled profile";
+        $("active-profile-criteria").textContent = `Titles: ${titles.join(", ") || "Any"} · Locations: ${locations.join(", ") || "Any"}`;
+      }
       let visibleJobs = app.jobs;
       if (selectedProfile) visibleJobs = visibleJobs.filter(job => profileMatchesJob(job, selectedProfile.profile));
       const query = app.resultsSearch.trim().toLowerCase();
@@ -1123,7 +1169,7 @@
       } catch (error) { showError(error); $("config-status").textContent = String(error); }
     }
 
-    async function activateProfile(id, openResultsTab = false) {
+    async function activateProfile(id) {
       const target = app.profiles.find(item => item.id === id);
       if (!target) {
         $("config-status").textContent = `Unknown profile: ${id}`;
@@ -1138,12 +1184,11 @@
           app.activeProfileId = id;
           app.profile = structuredClone(target.profile);
         }
-        if (openResultsTab) app.view = `profile:${id}`;
+        app.view = `profile:${id}`;
         renderProfile();
-        renderProfileSelector();
         renderTabs();
         if (changed) await saveConfiguration();
-        else if (openResultsTab) await loadResults();
+        else await loadResults();
       } catch (error) {
         showError(error);
         $("config-status").textContent = String(error);
@@ -1170,7 +1215,6 @@
         $("new-profile-name").value = "";
         $("new-profile-panel").open = false;
         renderProfile();
-        renderProfileSelector();
         renderTabs();
         await saveConfiguration();
       } catch (error) {
@@ -1221,7 +1265,6 @@
     }
 
     $("save-config").addEventListener("click", saveConfiguration);
-    $("profile-select").addEventListener("change", () => activateProfile($("profile-select").value, true));
     $("create-profile").addEventListener("click", createProfile);
     $("create-source").addEventListener("click", createSource);
     $("new-source-adapter").addEventListener("change", renderNewSourceFields);
