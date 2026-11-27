@@ -80,34 +80,70 @@
   ],
   "fixtures": [
     {
-      "company": "Sample Utility",
-      "title": "Electrical Apprentice",
+      "company": "Northstar Gridworks",
+      "title": "Junior Data Engineer",
       "location": "Sample City, ZZ",
-      "url": "https://example.invalid/jobs/sample-apprentice",
+      "url": "https://example.invalid/jobs/northstar-junior-data-engineer",
       "source_id": "demo_fixtures",
-      "posting_date": "Unknown",
-      "work_arrangement": "On-site",
-      "description": "Synthetic demo posting."
+      "posting_date": "2 days ago",
+      "work_arrangement": "Hybrid",
+      "region": "Example Region",
+      "description": "Fictional sample · Build Python and SQL data pipelines, improve data quality, and work with a small analytics team."
     },
     {
-      "company": "Demo Analytics",
+      "company": "Cedar Peak Systems",
+      "title": "Analytics Engineer",
+      "location": "Example Region",
+      "url": "https://example.invalid/jobs/cedar-peak-analytics-engineer",
+      "source_id": "demo_fixtures",
+      "posting_date": "5 days ago",
+      "work_arrangement": "On-site",
+      "region": "Example Region",
+      "description": "Fictional sample · Model reliable reporting datasets with dbt and SQL; partner with product and operations."
+    },
+    {
+      "company": "Blue Heron Labs",
       "title": "Data Platform Engineer",
       "location": "Remote - United States",
-      "url": "https://example.invalid/jobs/sample-data-platform",
+      "url": "https://example.invalid/jobs/blue-heron-data-platform-engineer",
       "source_id": "demo_fixtures",
-      "posting_date": "Unknown",
+      "posting_date": "1 day ago",
       "work_arrangement": "Remote",
-      "description": "Synthetic demo posting."
+      "region": "Fully Remote",
+      "description": "Fictional sample · Develop cloud data services with Python, SQL, and event-driven infrastructure."
     },
     {
-      "company": "Demo Operations",
-      "title": "Controls Technician",
-      "location": "Example Region",
-      "url": "https://example.invalid/jobs/sample-controls",
+      "company": "Juniper Harbor",
+      "title": "Business Intelligence Developer",
+      "location": "Remote - United States",
+      "url": "https://example.invalid/jobs/juniper-harbor-bi-developer",
       "source_id": "demo_fixtures",
-      "posting_date": "Unknown",
+      "posting_date": "4 days ago",
+      "work_arrangement": "Remote",
+      "region": "Fully Remote",
+      "description": "Fictional sample · Create accessible dashboards, document metrics, and help teams make data-informed decisions."
+    },
+    {
+      "company": "Copperline Works",
+      "title": "Controls Technician Apprentice",
+      "location": "Sample City, ZZ",
+      "url": "https://example.invalid/jobs/copperline-controls-apprentice",
+      "source_id": "demo_fixtures",
+      "posting_date": "3 days ago",
       "work_arrangement": "On-site",
-      "description": "Synthetic demo posting."
+      "region": "Career Transition Jobs",
+      "description": "Fictional sample · Entry-level, paid training in industrial controls, troubleshooting, and safety practices."
+    },
+    {
+      "company": "Maple Ridge Utilities",
+      "title": "Electrical Maintenance Trainee",
+      "location": "Example Region",
+      "url": "https://example.invalid/jobs/maple-ridge-maintenance-trainee",
+      "source_id": "demo_fixtures",
+      "posting_date": "1 week ago",
+      "work_arrangement": "On-site",
+      "region": "Career Transition Jobs",
+      "description": "Fictional sample · Structured training role for a career changer interested in electrical systems and field work."
     }
   ]
 }
