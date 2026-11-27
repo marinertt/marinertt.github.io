@@ -106,14 +106,14 @@
     .step-num { min-width: 18px; height: 18px; border-radius: 6px; display: grid; place-items: center; background: #1d3145; color: var(--mint); font-size: 10px; font-weight: 800; }
     .actions { display: grid; grid-template-columns: 1.15fr 1fr 1fr auto; gap: 9px; align-items: end; padding: 14px; margin-bottom: 14px; }
     .actions .field { margin: 0; }
-    .results-search, .resource-reader { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: end; padding: 12px 14px; margin-bottom: 10px; }
-    .results-search .field, .resource-reader .field { margin: 0; }
-    .results-search small, .source-search-help { color: var(--muted); font-size: 11px; }
-    .resource-reader small { color: var(--muted); font-size: 11px; }
+    .results-search-form { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: end; }
+    .results-search-form .field { margin: 0; }
+    .results-search-form small, .source-search-help { color: var(--muted); font-size: 11px; }
     .source-search { margin-bottom: 14px; padding: 11px 14px; }
     .source-search[open] summary { margin-bottom: 8px; }
     .source-search > summary { font-weight: 750; color: #c9d8e9; }
     .source-search .actions { margin: 0; box-shadow: none; }
+    .resource-output { margin-top: 8px; max-height: 200px; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 11px; }
     .tools-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 11px 14px; margin-bottom: 14px; }
     .inline { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
     .tabs { display: flex; gap: 6px; overflow-x: auto; padding: 4px 1px 10px; scrollbar-width: thin; }
@@ -151,7 +151,7 @@
     @media (max-width: 1050px) {
       .shell { grid-template-columns: 275px minmax(0, 1fr); }
       .actions { grid-template-columns: 1fr 1fr; }
-      .results-search { grid-template-columns: 1fr auto; }
+      .results-search-form { grid-template-columns: 1fr auto; }
       .actions button { min-height: 38px; }
     }
     @media (max-width: 760px) {
@@ -242,7 +242,9 @@
         </div>
         <div class="config-subsection">
           <div class="config-head"><h3 style="margin:0">MCP resources</h3></div>
-          <p class="sidebar-hint">Choose and read an MCP resource in the Search a resource tab.</p>
+          <p class="sidebar-hint">Read a resource to inspect its data. This does not change your profile or sources.</p>
+          <div class="inline"><select id="resource-select" style="flex:1" aria-label="MCP resource"></select><button id="read-resource" type="button">Read</button></div>
+          <pre id="resource-output" class="response-block resource-output">No resource read yet.</pre>
         </div>
       </details>
       <div class="config-actions">
@@ -255,8 +257,7 @@
 
     <main id="main">
       <div class="view-switcher" role="tablist" aria-label="Main views">
-        <button id="results-view-tab" class="view-tab" role="tab" data-workspace-tab aria-selected="true" aria-controls="results-view">Search results</button>
-        <button id="resource-view-tab" class="view-tab" role="tab" data-workspace-tab aria-selected="false" aria-controls="resource-view" tabindex="-1">Search a resource</button>
+        <button id="results-view-tab" class="view-tab" role="tab" data-workspace-tab aria-selected="true" aria-controls="results-view">search results</button>
         <button id="how-it-works-tab" class="view-tab" role="tab" data-workspace-tab aria-selected="false" aria-controls="how-it-works-view" tabindex="-1">How it works</button>
       </div>
       <div id="mode-notice" class="notice" hidden></div>
@@ -265,15 +266,18 @@
         <div class="topline">
           <div>
             <div class="eyebrow">Job monitor</div>
-            <h1>Search results</h1>
+            <h1>search results</h1>
             <p id="monitor-subtitle" class="subtitle">Browse captured postings by view. Configure profiles and job boards in the left panel.</p>
           </div>
           <div class="status"><span class="dot"></span><span id="connection-status">Connecting to local server</span></div>
         </div>
-        <section class="section results-search" aria-label="Search current results">
-          <div class="field"><label for="results-search">SEARCH THIS RESULT TAB</label><input id="results-search" type="search" placeholder="Title, company, location, or keywords"><small>Filters listings already shown here; it does not run a job-board search.</small></div>
-          <button id="clear-results-search" class="ghost" type="button">Clear</button>
-        </section>
+        <details id="results-search-panel" class="section source-search">
+          <summary>Search this result tab</summary>
+          <div class="results-search-form">
+            <div class="field"><label for="results-search">SEARCH THIS RESULT TAB</label><input id="results-search" type="search" placeholder="Title, company, location, or keywords"><small>Filters listings already shown here; it does not run a job-board search.</small></div>
+            <button id="clear-results-search" class="ghost" type="button">Clear</button>
+          </div>
+        </details>
         <details id="source-search-panel" class="section source-search">
           <summary>Search a job board</summary>
           <p class="source-search-help">Discovery is separate from filtering results. Choose a configured source to run its search.</p>
@@ -284,10 +288,6 @@
             <button id="search-button" class="primary">Run source search →</button>
           </section>
         </details>
-        <div class="tools-row section">
-          <div><div class="eyebrow">Sample board</div><span class="muted">Load fictional sample listings to explore result views. The hosted demo preloads them.</span></div>
-          <button id="seed-demo" class="ghost">Load demo fixtures</button>
-        </div>
         <div id="results-tabs" class="tabs" role="tablist" aria-label="Result views"></div>
         <div id="active-profile-context" class="section profile-context" hidden>
           <div class="eyebrow">Profile tab</div>
@@ -295,30 +295,8 @@
           <span id="active-profile-criteria"></span>
         </div>
         <section id="results-section" class="section results">
-          <div class="results-head"><div><div class="eyebrow">Results</div><h2 id="results-title">Raw Search Hits</h2></div><div class="inline"><span id="result-count" class="tag">0 postings</span><button id="refresh-results" class="ghost">Refresh ↻</button></div></div>
+          <div class="results-head"><div><div class="eyebrow">Results</div><h2 id="results-title">Raw Search Hits</h2></div><div class="inline"><span id="result-count" class="tag">0 postings</span><button id="seed-demo" class="ghost">Load demo fixtures</button><button id="refresh-results" class="ghost">Refresh ↻</button></div></div>
           <div id="results-body" class="results-body"><div class="empty">Loading audit results…</div></div>
-        </section>
-      </section>
-
-      <section id="resource-view" class="view-panel" role="tabpanel" aria-labelledby="resource-view-tab" hidden>
-        <div class="topline">
-          <div>
-            <div class="eyebrow">MCP resources</div>
-            <h1>Search a resource</h1>
-            <p class="subtitle">Choose a resource to read its contents. Resources are read-only and do not run a job-board search.</p>
-          </div>
-        </div>
-        <section class="section resource-reader" aria-label="Read a resource">
-          <div class="field">
-            <label for="resource-select">RESOURCE</label>
-            <select id="resource-select" aria-label="MCP resource"></select>
-            <small>Select a resource exposed by the connected job monitor.</small>
-          </div>
-          <button id="read-resource" class="primary" type="button">Read resource</button>
-        </section>
-        <section class="section resource-output-panel">
-          <div class="results-head"><div><div class="eyebrow">Resource contents</div><h2>Read-only data</h2></div></div>
-          <div class="results-body"><pre id="resource-output" class="resource-output">Select a resource and choose Read resource to inspect its contents.</pre></div>
         </section>
       </section>
 
@@ -696,7 +674,6 @@
         $("save-config").textContent = "Save in this browser";
         $("footer").textContent = "Static simulation · browser local storage · no live searches, checks, promotions, or applications";
         $("monitor-subtitle").textContent = "Browse simulated postings by view. The hosted demo makes no live searches or posting checks.";
-        document.querySelector(".tools-row .muted").textContent = "Fictional sample listings are preloaded. Search filters only these bundled examples; no external request is made.";
         $("seed-demo").textContent = "Restore sample listings";
         document.querySelector(".window.client .window-title").lastChild.textContent = " Client request (simulated)";
         document.querySelector(".window.server .window-title").lastChild.textContent = " MCP server simulation";
