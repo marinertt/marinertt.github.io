@@ -3,6 +3,4 @@
 
 .hero-subtitle{font:400 clamp(1.8rem,3.6vw,3.2rem)/1.18 Georgia,serif;letter-spacing:-.025em;color:var(--warm);margin:0 0 1.5rem;text-wrap:balance}
 
-.about-emblem{margin-top:2rem}.emblem-figure{margin:1.5rem 0 2rem}.emblem-figure img{display:block;width:100%;height:auto;border-radius:.6rem}.about-emblem p{max-width:70ch}
-
-.home-emblem{margin:0;min-width:0}.home-emblem img{display:block;width:100%;height:auto;border-radius:.6rem}.home-emblem figcaption{margin-top:.8rem;font-size:.9rem;color:var(--muted)}.feature+.data-visual{margin-top:2rem;max-width:40rem}
+.feature+.data-visual{margin-top:2rem;max-width:40rem}

@@ -37,8 +37,7 @@
     .shell { display: grid; grid-template-columns: minmax(270px, 320px) minmax(0, 1fr); min-height: 100vh; }
     aside { padding: 22px 18px; border-right: 1px solid var(--line); background: #0e1621eF; overflow-y: auto; max-height: 100vh; position: sticky; top: 0; }
     main { padding: 24px clamp(18px, 3vw, 42px) 42px; min-width: 0; }
-    .brand { display: flex; gap: 12px; align-items: center; margin-bottom: 24px; }
-    .mark { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 12px; color: #09140f; background: var(--mint); font-size: 19px; font-weight: 900; box-shadow: 0 0 28px #79e0be33; }
+    .brand { display: flex; align-items: center; margin-bottom: 24px; }
     .brand b { display: block; font-size: 14px; letter-spacing: .01em; }
     .brand small, .muted, .hint { color: var(--muted); }
     .brand small { font-size: 11px; }
@@ -135,6 +134,7 @@
     .job-notes { color: #bcc9d8; font-size: 11px; }
     .job-meta { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }
     .job-description { color: #aebdd0; font-size: 11px; margin-top: 8px; }
+    body[data-mode="static"] .job-description { display: none; }
     .job-actions { display: flex; gap: 6px; }
     .job-actions button { padding: 6px 8px; font-size: 11px; }
     .empty { color: var(--muted); padding: 30px 16px; text-align: center; }
@@ -184,16 +184,15 @@
   <div class="shell">
     <aside>
       <div class="brand">
-        <div class="mark">JB</div>
-        <div><b>Job Board MCP</b><small>Local-first job monitor</small></div>
+        <div><b>Job Board MCP</b><small>Job monitor</small></div>
       </div>
       <div class="config-head">
         <div><div class="eyebrow">01 · Configure</div><h2 style="margin-top:4px">Monitor settings</h2></div>
-        <span class="tag green">local</span>
+        <span id="mode-tag" class="tag green">local</span>
       </div>
       <details id="profiles-panel" class="sidebar-group">
         <summary><strong>Profiles</strong><span id="profile-count" class="tag">0 profiles</span></summary>
-        <p class="sidebar-hint">Each profile has a results tab. Select a profile tab to edit its settings.</p>
+        <p class="sidebar-hint">Select a profile tab to edit it.</p>
         <details id="profile-editor" class="config-section">
           <summary><strong>Profile settings</strong><span id="active-profile-tag" class="tag">Active</span></summary>
           <div class="field"><label for="profile-name">PROFILE NAME</label><input id="profile-name"></div>
@@ -212,7 +211,7 @@
         <details id="new-profile-panel" class="config-section">
           <summary>Add a profile tab</summary>
           <div class="field"><label for="new-profile-name">NEW PROFILE NAME</label><input id="new-profile-name" placeholder="e.g. Data engineering"></div>
-          <p class="hint">Starts as a copy of the active profile. The new tab filters captured results by its title and location criteria.</p>
+          <p class="hint">Copies the active profile; its tab filters by title and location.</p>
           <button id="create-profile" class="primary" type="button">Add profile</button>
         </details>
       </details>
@@ -242,7 +241,7 @@
         </div>
         <div class="config-subsection">
           <div class="config-head"><h3 style="margin:0">MCP resources</h3></div>
-          <p class="sidebar-hint">Read a resource to inspect its data. This does not change your profile or sources.</p>
+          <p class="sidebar-hint">Read a resource to inspect its data.</p>
           <div class="inline"><select id="resource-select" style="flex:1" aria-label="MCP resource"></select><button id="read-resource" type="button">Read</button></div>
           <pre id="resource-output" class="response-block resource-output">No resource read yet.</pre>
         </div>
@@ -252,7 +251,7 @@
         <button id="reload" title="Reload active profile">↻</button>
       </div>
       <div id="config-status" class="status-note">Loading local configuration…</div>
-      <div id="sidebar-notice" class="notice"><b>Safe demo:</b> settings are copied to <code>.local/job-board-demo</code>. Demo fixtures are fake and unverified. Live searches require you to enable and configure a supported source.</div>
+      <div id="sidebar-notice" class="notice"><b>Demo data is fictional and unverified.</b> Live searches need a configured source.</div>
     </aside>
 
     <main id="main">
@@ -267,20 +266,20 @@
           <div>
             <div class="eyebrow">Job monitor</div>
             <h1>search results</h1>
-            <p id="monitor-subtitle" class="subtitle">Browse captured postings by view. Configure profiles and job boards in the left panel.</p>
+            <p id="monitor-subtitle" class="subtitle">Browse captured postings by view.</p>
           </div>
           <div class="status"><span class="dot"></span><span id="connection-status">Connecting to local server</span></div>
         </div>
         <details id="results-search-panel" class="section source-search">
           <summary>Search this result tab</summary>
           <div class="results-search-form">
-            <div class="field"><label for="results-search">SEARCH THIS RESULT TAB</label><input id="results-search" type="search" placeholder="Title, company, location, or keywords"><small>Filters listings already shown here; it does not run a job-board search.</small></div>
+            <div class="field"><label for="results-search">SEARCH THIS RESULT TAB</label><input id="results-search" type="search" placeholder="Title, company, location, or keywords"><small>Filters the current results.</small></div>
             <button id="clear-results-search" class="ghost" type="button">Clear</button>
           </div>
         </details>
         <details id="source-search-panel" class="section source-search">
           <summary>Search a job board</summary>
-          <p class="source-search-help">Discovery is separate from filtering results. Choose a configured source to run its search.</p>
+          <p class="source-search-help">Choose a configured source and run a search.</p>
           <section class="actions">
             <div class="field"><label for="source-select">SOURCE</label><select id="source-select"></select></div>
             <div class="field"><label for="search-query">SOURCE QUERY</label><input id="search-query" placeholder="e.g. data engineer"></div>
@@ -303,23 +302,23 @@
       <section id="how-it-works-view" class="view-panel" role="tabpanel" aria-labelledby="how-it-works-tab" hidden>
         <div class="topline">
           <div>
-            <div class="eyebrow">MCP · Client ↔ Server</div>
-            <h1>See the call. Follow the data.</h1>
-            <p class="subtitle">Explore the actual MCP tools, resources, and prompts. Every action shows the client request and the server response.</p>
+            <div class="eyebrow">MCP flow</div>
+            <h1>Request and response</h1>
+            <p class="subtitle">Inspect each client request and server response.</p>
           </div>
         </div>
         <section class="workbench">
           <div class="section window client">
             <div class="window-head"><div class="window-title"><span class="window-icon">C</span> MCP client</div><span class="tag">request</span></div>
             <div class="window-body">
-              <div class="step"><span class="step-num">1</span><span id="client-step"><b>Choose an action.</b> This panel records the request sent over MCP stdio.</span></div>
+              <div class="step"><span class="step-num">1</span><span id="client-step"><b>Choose an action.</b> The request appears here.</span></div>
               <div class="request-block"><span class="eyebrow">LAST CLIENT REQUEST</span><pre id="client-request">Waiting for your first action…</pre></div>
             </div>
           </div>
           <div class="section window server">
             <div class="window-head"><div class="window-title"><span class="window-icon">S</span> MCP server</div><span class="tag green">response</span></div>
             <div class="window-body">
-              <div class="step"><span class="step-num">2</span><span id="server-step"><b>Server ready.</b> Calls are routed to registered FastMCP handlers.</span></div>
+              <div class="step"><span class="step-num">2</span><span id="server-step"><b>Server ready.</b> Responses appear here.</span></div>
               <div class="response-block"><span class="eyebrow">LAST SERVER RESPONSE</span><pre id="server-response">Server response will appear here.</pre></div>
             </div>
           </div>
@@ -330,7 +329,7 @@
         <div class="below">
           <section class="section subpanel">
             <div class="eyebrow">MCP prompts</div><h2>Render a prompt</h2>
-            <p class="hint">Prompts are returned as instructions/context; rendering one does not run a search.</p>
+            <p class="hint">Prompts return instructions; they do not run searches.</p>
             <select id="prompt-select"></select>
             <div id="prompt-arguments"></div>
             <button id="get-prompt" style="margin-top:4px">Get prompt</button>
@@ -350,6 +349,21 @@
     const workspaceTabs = [...document.querySelectorAll("[data-workspace-tab]")];
     let staticDefaults;
     const pretty = (value) => {
+      const rows = Array.isArray(value)
+        ? value
+        : Array.isArray(value?.structuredContent)
+          ? value.structuredContent
+          : null;
+      const isPostingList = STATIC_DEMO && rows?.length && rows.every(
+        row => row && typeof row === "object" && ("title" in row || "job_title" in row)
+      );
+      if (isPostingList) {
+        return JSON.stringify({
+          note: "Fictional sample postings",
+          count: rows.length,
+          postings: rows.map(row => `${row.title || row.job_title} — ${row.company || "Unknown company"}`)
+        }, null, 2);
+      }
       const text = JSON.stringify(value, null, 2);
       return text.length > 12000 ? `${text.slice(0, 12000)}\n… response truncated for display` : text;
     };
@@ -669,16 +683,17 @@
         : `${state.tools.length} tools · MCP connected`;
       if (STATIC_DEMO) {
         $("mode-notice").hidden = false;
-        $("mode-notice").textContent = "GitHub Pages static demo: MCP calls are simulated in this browser. Searches, verification, promotion, and workbook writes do not reach a server. Settings and sample rows stay in this browser’s local storage.";
-        $("sidebar-notice").innerHTML = "<b>Static demo:</b> settings and fictional fixtures stay in this browser. No live searches or posting checks are made.";
+        $("mode-notice").textContent = "Static demo: searches and MCP actions are simulated; data stays in this browser.";
+        $("sidebar-notice").hidden = true;
+        $("mode-tag").textContent = "demo";
         $("save-config").textContent = "Save in this browser";
-        $("footer").textContent = "Static simulation · browser local storage · no live searches, checks, promotions, or applications";
-        $("monitor-subtitle").textContent = "Browse simulated postings by view. The hosted demo makes no live searches or posting checks.";
+        $("footer").textContent = "Static demo · No live data or applications.";
+        $("monitor-subtitle").textContent = "Browse sample postings by view.";
         $("seed-demo").textContent = "Restore sample listings";
         document.querySelector(".window.client .window-title").lastChild.textContent = " Client request (simulated)";
         document.querySelector(".window.server .window-title").lastChild.textContent = " MCP server simulation";
-        $("client-step").textContent = "Choose an action. This panel shows the simulated protocol request.";
-        $("server-step").textContent = "Static simulation ready. No MCP server process is connected.";
+        $("client-step").textContent = "Choose an action to see the simulated request.";
+        $("server-step").textContent = "Simulated responses appear here.";
         document.querySelector(".window.server .tag").textContent = "simulated";
         document.querySelector(".window.server .tag").className = "tag amber";
         $("search-button").textContent = "Simulate source search →";

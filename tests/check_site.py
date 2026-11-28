@@ -41,6 +41,11 @@ assert (ROOT / '.nojekyll').exists()
 job_monitor = ROOT / 'job-monitor' / 'index.html'
 assert job_monitor.is_file(), 'Missing generated Job Monitor page'
 assert 'data-mode="static"' in job_monitor.read_text(), 'Job Monitor must use static simulation mode'
+assert not (ROOT / 'assets' / 'sparktacus-emblem.png').exists(), 'Emblem asset should be removed'
+for path in pages:
+    assert 'emblem' not in path.read_text().lower(), f'{path.relative_to(ROOT)}: emblem content remains'
+    assert 'spartacus' not in path.read_text().lower(), f'{path.relative_to(ROOT)}: origin story remains'
+assert 'emblem' not in (ROOT / 'assets' / 'site.css').read_text().lower(), 'Emblem styles remain'
 for path, page in pages.items():
     if path.name == 'index.html' and path in {
         ROOT / 'index.html',
