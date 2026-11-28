@@ -46,7 +46,14 @@ for path in pages:
     assert 'emblem' not in path.read_text().lower(), f'{path.relative_to(ROOT)}: emblem content remains'
 assert 'emblem' not in (ROOT / 'assets' / 'site.css').read_text().lower(), 'Emblem styles remain'
 about = (ROOT / 'about' / 'index.html').read_text()
-for phrase in ('About SPARKTACUS!', 'More capability. Less gatekeeping.', 'Why the name?', 'About Todd'):
+for phrase in (
+    'About SPARKTACUS!',
+    'More capability. Less gatekeeping.',
+    'Why SPARKTACUS?',
+    'Apache Spark',
+    'The old systems said',
+    'About Todd',
+):
     assert phrase in about, f'About page is missing required content: {phrase}'
 for path, page in pages.items():
     if path.name == 'index.html' and path in {
