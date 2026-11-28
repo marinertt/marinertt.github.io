@@ -44,8 +44,10 @@ assert 'data-mode="static"' in job_monitor.read_text(), 'Job Monitor must use st
 assert not (ROOT / 'assets' / 'sparktacus-emblem.png').exists(), 'Emblem asset should be removed'
 for path in pages:
     assert 'emblem' not in path.read_text().lower(), f'{path.relative_to(ROOT)}: emblem content remains'
-    assert 'spartacus' not in path.read_text().lower(), f'{path.relative_to(ROOT)}: origin story remains'
 assert 'emblem' not in (ROOT / 'assets' / 'site.css').read_text().lower(), 'Emblem styles remain'
+about = (ROOT / 'about' / 'index.html').read_text()
+for phrase in ('About SPARKTACUS!', 'More capability. Less gatekeeping.', 'Why the name?', 'About Todd'):
+    assert phrase in about, f'About page is missing required content: {phrase}'
 for path, page in pages.items():
     if path.name == 'index.html' and path in {
         ROOT / 'index.html',
